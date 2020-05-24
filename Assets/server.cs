@@ -8,8 +8,9 @@ public class Echo : WebSocketBehavior
 {
     protected override void OnMessage(MessageEventArgs e)
     {
-        Debug.Log("Got msg " + e.Data + " time: " + Time.time);
-        Send(e.Data + " t: " + Time.time);
+        Debug.Log("Got msg " + e.Data);
+
+        Send(e.Data + " t: " + System.DateTime.Now.ToString("h:mm:ss tt"));
     }
 }
 
@@ -35,17 +36,14 @@ public class DebugLogWriter : System.IO.TextWriter
 public class server : MonoBehaviour
 {
     WebSocketServer wssv = null;
+    public bool autoStartServer;
     // Start is called before the first frame update
     void Start()
     {
-        System.Console.SetOut(new DebugLogWriter());
-        Debug.Log("about to start wssv ");
-        wssv = new WebSocketServer("ws://localhost:7268");
-        wssv.AddWebSocketService<Echo>("/");
-        
-        Debug.Log("starting wssv ");
-        wssv.Start();
-        Debug.Log("started wssv " + wssv.IsListening);
+        if (autoStartServer)
+        {
+            startServer();
+        }
     }
 
     // Update is called once per frame
@@ -59,9 +57,21 @@ public class server : MonoBehaviour
         //Debug.LogWarning("Got socket Error: " + output);
     }
 
+    public void startServer()
+    {
+        System.Console.SetOut(new DebugLogWriter());
+        Debug.Log("about to start wssv ");
+        wssv = new WebSocketServer("ws://localhost:7268");
+        wssv.AddWebSocketService<Echo>("/");
+
+        Debug.Log("starting wssv ");
+        wssv.Start();
+        Debug.Log("started wssv " + wssv.IsListening);
+    }
+
     void closeStuff()
     {
-        if (wssv == null)
+        if (wssv != null && wssv.IsListening)
         {
             Debug.Log("Closing server");
             wssv.Stop();
