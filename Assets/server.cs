@@ -8,7 +8,7 @@ public class Echo : WebSocketBehavior
 {
     protected override void OnMessage(MessageEventArgs e)
     {
-        Debug.Log("Got msg " + e.Data);
+        NetDebug.printBoth("Server Got msg " + e.Data);
 
         Send(e.Data + " t: " + System.DateTime.Now.ToString("h:mm:ss tt"));
     }
@@ -20,11 +20,13 @@ public class DebugLogWriter : System.IO.TextWriter
     {
         base.Write(value);
         Debug.LogError(value);
+        NetDebug.printBoth(value);
     }
     public override void WriteLine(string value)
     {
         base.WriteLine();
         Debug.LogError(value);
+        NetDebug.printBoth(value);
     }
 
     public override System.Text.Encoding Encoding
@@ -60,33 +62,33 @@ public class server : MonoBehaviour
     public void startServer()
     {
         System.Console.SetOut(new DebugLogWriter());
-        Debug.Log("about to start wssv ");
+        NetDebug.printBoth("about to start wssv ");
         wssv = new WebSocketServer("ws://localhost:7268");
         wssv.AddWebSocketService<Echo>("/");
 
-        Debug.Log("starting wssv ");
+        NetDebug.printBoth("starting wssv ");
         wssv.Start();
-        Debug.Log("started wssv " + wssv.IsListening);
+        NetDebug.printBoth("started wssv " + wssv.IsListening);
     }
 
     void closeStuff()
     {
         if (wssv != null && wssv.IsListening)
         {
-            Debug.Log("Closing server");
+            NetDebug.printBoth("Closing server");
             wssv.Stop();
-            Debug.Log("Closed server listening: " + wssv.IsListening);
+            NetDebug.printBoth("Closed server listening: " + wssv.IsListening);
         }
     }
 
     void OnApplicationQuit()
     {
-        Debug.Log("Quit...");
+        NetDebug.printBoth("Quit Server...");
         closeStuff();
     }
     void OnDestroy()
     {
-        Debug.Log("Destroyed...");
+        NetDebug.printBoth("Destroyed Server...");
         closeStuff();
     }
 }

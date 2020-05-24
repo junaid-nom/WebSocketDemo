@@ -26,7 +26,7 @@ public class client : MonoBehaviour
     public void startClient()
     {
         ws = new WebSocket("ws://localhost:7268");
-        ws.OnMessage += (sender, e) => Debug.Log("Server says: " + e.Data);
+        ws.OnMessage += (sender, e) => NetDebug.printBoth("Client Received: " + e.Data);
         ws.OnOpen += (sender, e) => ws.Send("clientTest");
         ws.Connect();
     }
@@ -35,20 +35,20 @@ public class client : MonoBehaviour
     {
         if (ws != null && ws.IsAlive)
         {
-            Debug.Log("Closing client");
+            NetDebug.printBoth("Closing client");
             ws.Close();
-            Debug.Log("Closed client: " + ws.IsAlive);
+            NetDebug.printBoth("Closed client: " + ws.IsAlive);
         }
     }
 
     void OnApplicationQuit()
     {
-        Debug.Log("Quit...");
+        NetDebug.printBoth("Quit Client...");
         closeStuff();
     }
     void OnDestroy()
     {
-        Debug.Log("Destroyed...");
+        NetDebug.printBoth("Destroyed Client...");
         closeStuff();
     }
 }
