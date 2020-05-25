@@ -2,15 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 using WebSocketSharp;
+using System.Text;
 using WebSocketSharp.Server;
+
 
 public class Echo : WebSocketBehavior
 {
     protected override void OnMessage(MessageEventArgs e)
-    {
-        NetDebug.printBoth("Server Got msg " + e.Data);
+    {   
+        //NetDebug.printBoth("Server Got msg " + e.Data + " Raw " + Encoding.UTF8.GetString(e.RawData));
 
-        Send(e.Data + " t: " + System.DateTime.Now.ToString("h:mm:ss tt"));
+        //Send(e.Data + " t: " + System.DateTime.Now.ToString("h:mm:ss tt"));
+        Message deser = (Message)BinarySerializer.Deserialize(e.RawData);
+        NetDebug.printBoth("Server got msg type: " + deser.msgType);
+        MessageManager.debugMsg(deser);
+
+        Send(BinarySerializer.Serialize(new StringMessage(" Server got your msgtype: " + deser.msgType)));
+
+        CopyMovement cptest = new CopyMovement();
+        cptest.anim_state = "anim2";
+        cptest.ignoreRotation = false;
+        cptest.localPosition = new Vector3(1, 2, 3);
+        cptest.localRotation = Quaternion.Euler(10, 20, 30);
+        cptest.normalizedTime = .2f;
+        Send(BinarySerializer.Serialize(cptest));
     }
 }
 
@@ -62,8 +77,9 @@ public class server : MonoBehaviour
     public void startServer()
     {
         System.Console.SetOut(new DebugLogWriter());
+
         NetDebug.printBoth("about to start wssv ");
-        wssv = new WebSocketServer("ws://localhost:7268");
+        wssv = new WebSocketServer("ws://127.0.0.1:7268");
         wssv.AddWebSocketService<Echo>("/");
 
         NetDebug.printBoth("starting wssv ");
