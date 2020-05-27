@@ -25,7 +25,9 @@ public class CopyMovement : Message
 
     public override string ToString()
     {
-        return "loc:" + localPosition.ToString() + " rot: " + localRotation.ToString() + " anim: " + anim_state + " ntime: " + normalizedTime + " ignoreRot: " + ignoreRotation;
+        return "loc:" + localPosition.ToString() + " rot: " + localRotation.ToString() + " anim: " + anim_state + " ntime: " + normalizedTime
+        + " ignoreRot: " + ignoreRotation
+        ;
     }
 }
 
@@ -70,10 +72,15 @@ public class StringMessage : Message
     }
 }
 
-public static class MessageManager
+// meant to hold msgs per User
+public class MessageManager
 {
-    private static Dictionary<System.Type, List<Message>> msgs = new Dictionary<System.Type, List<Message>>();
-    public static void addMessage(Message msg)
+    private Dictionary<System.Type, List<Message>> msgs = new Dictionary<System.Type, List<Message>>();
+    private DateTime lastMessageTime;
+
+    public DateTime LastMessageTime { get => lastMessageTime; }
+
+    public void addMessage(Message msg)
     {
         System.Type msgType = msg.GetType();
         if (!msgs.ContainsKey(msgType))
@@ -81,9 +88,10 @@ public static class MessageManager
             msgs[msgType] = new List<Message>();
         }
         msgs[msgType].Add(msg);
+        lastMessageTime = System.DateTime.Now;
     }
 
-    public static T popMessage<T> () where T:Message
+    public T popMessage<T> () where T:Message
     {
         System.Type msgType = typeof(T);
         if (!msgs.ContainsKey(msgType) || msgs[msgType].Count <= 0)
@@ -94,6 +102,26 @@ public static class MessageManager
         {
             T ret = (T)msgs[msgType][0];
             msgs[msgType].RemoveAt(0);
+            return ret;
+        }
+    }
+
+    public List<T> popAllMessages<T>() where T : Message
+    {
+        System.Type msgType = typeof(T);
+        if (!msgs.ContainsKey(msgType) || msgs[msgType].Count <= 0)
+        {
+            return null;
+        }
+        else
+        {
+            List<T> ret = new List<T>();
+            // Casting forces manually casting each element
+            while (msgs[msgType].Count > 0)
+            {
+                ret.Add((T)msgs[msgType][0]);
+                msgs[msgType].RemoveAt(0);
+            }
             return ret;
         }
     }

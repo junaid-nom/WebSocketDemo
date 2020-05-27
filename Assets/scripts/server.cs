@@ -5,20 +5,37 @@ using WebSocketSharp;
 using System.Text;
 using WebSocketSharp.Server;
 
-
-public class Echo : WebSocketBehavior
+public struct GotMessage
 {
+    public string uid;
+    public Message m;
+    public GotMessage(string uid, Message m)
+    {
+        this.uid = uid;
+        this.m = m;
+    }
+}
+
+public class StoreMessages : WebSocketBehavior
+{
+    public static List<GotMessage> newMsgs = new List<GotMessage>();
+
     protected override void OnMessage(MessageEventArgs e)
-    {   
+    {
+        // TODO: Eventually have login and this will prob be username->usermanager and there will be ID -> username or something
+        // For now treat every new connection as a completely new user
+        
+
         //NetDebug.printBoth("Server Got msg " + e.Data + " Raw " + Encoding.UTF8.GetString(e.RawData));
 
         //Send(e.Data + " t: " + System.DateTime.Now.ToString("h:mm:ss tt"));
         Message deser = (Message)BinarySerializer.Deserialize(e.RawData);
+        newMsgs.Add(new GotMessage(ID, deser));
+
+        /*
+        Send(BinarySerializer.Serialize(new StringMessage(" Server got your msgtype: " + deser.msgType)));
         NetDebug.printBoth("Server got msg type: " + deser.msgType);
         MessageManager.debugMsg(deser);
-
-        Send(BinarySerializer.Serialize(new StringMessage(" Server got your msgtype: " + deser.msgType)));
-
         CopyMovement cptest = new CopyMovement();
         cptest.anim_state = "anim2";
         cptest.ignoreRotation = false;
@@ -26,7 +43,9 @@ public class Echo : WebSocketBehavior
         cptest.localRotation = Quaternion.Euler(10, 20, 30);
         cptest.normalizedTime = .2f;
         Send(BinarySerializer.Serialize(cptest));
+        */
     }
+    
 }
 
 public class DebugLogWriter : System.IO.TextWriter
@@ -50,10 +69,12 @@ public class DebugLogWriter : System.IO.TextWriter
     }
 }
 
-public class server : MonoBehaviour
+public class Server : MonoBehaviour
 {
+    private static Dictionary<string, UserManager> uidToUserM = new Dictionary<string, UserManager>();
     WebSocketServer wssv = null;
     public bool autoStartServer;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -62,16 +83,48 @@ public class server : MonoBehaviour
             startServer();
         }
     }
-
+    
     // Update is called once per frame
     void Update()
     {
-        //wssv.Log.Error("wtfff");
-        //System.Console.Out.WriteLine("poop1");
-        //System.Console.Out.Write("poop2");
+        // Use while loop and remove 1 at a time so that its more thread safe.
+        // If you clear whole list, maybe a message was added right before you cleared.
+        while (StoreMessages.newMsgs.Count > 0)
+        {
+            transferNewMessage(StoreMessages.newMsgs[0]);
+            StoreMessages.newMsgs.RemoveAt(0);
+        }
+        
+    }
 
-        //string output = 
-        //Debug.LogWarning("Got socket Error: " + output);
+    void transferNewMessage(GotMessage gm)
+    {
+        UserManager um = getUserManager(gm.uid);
+
+        if (um == null)
+        {
+            addUserManager(gm.uid);
+            um = Server.getUserManager(gm.uid);
+        }
+        um.addMessage(gm.m);
+    }
+
+    public static UserManager getUserManager(string uid)
+    {
+        if (uidToUserM.ContainsKey(uid))
+        {
+            return uidToUserM[uid];
+        } else
+        {
+            return null;
+        }
+    }
+
+    public void addUserManager(string uid)
+    {
+        UserManager newum = gameObject.AddComponent<UserManager>();
+        uidToUserM.Add(uid, newum);
+        newum.startup(uid, Constants.playerCharacterPrefab, new Vector3(0, 0, 0));
     }
 
     public void startServer()
@@ -80,7 +133,7 @@ public class server : MonoBehaviour
 
         NetDebug.printBoth("about to start wssv ");
         wssv = new WebSocketServer("ws://127.0.0.1:7268");
-        wssv.AddWebSocketService<Echo>("/");
+        wssv.AddWebSocketService<StoreMessages>("/");
 
         NetDebug.printBoth("starting wssv ");
         wssv.Start();

@@ -83,7 +83,7 @@ public class client : MonoBehaviour
 
     void closeStuff()
     {
-        if (ws != null && ws.GetState() == WebSocketState.Open || ws.GetState() == WebSocketState.Connecting)
+        if (ws != null && (ws.GetState() == WebSocketState.Open || ws.GetState() == WebSocketState.Connecting))
         {
             NetDebug.printBoth("Closing client");
             ws.Close();
