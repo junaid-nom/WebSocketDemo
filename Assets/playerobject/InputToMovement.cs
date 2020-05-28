@@ -95,7 +95,7 @@ public class InputToMovement : MonoBehaviour
         return Quaternion.Euler(0, Quaternion.LookRotation((direction).normalized).eulerAngles.y, 0);
     }
 
-    public static CopyMovement inputToMovement(UserInput inp, Vector3 oldPositionLocal, Quaternion oldRotationLocal, float speed, Animator animator, string canChangeState, List<string> stateNames)
+    public static CopyMovement inputToMovement(UserInput inp, Vector3 oldPositionLocal, Quaternion oldRotationLocal, float speed, Animator animator, string canChangeState, List<string> stateNames, string uid)
     {
         CopyMovement cp = new CopyMovement();
         bool canChange = animator.GetCurrentAnimatorStateInfo(0).IsName(canChangeState);
@@ -123,6 +123,8 @@ public class InputToMovement : MonoBehaviour
             cp.anim_state = null;
             cp.normalizedTime = -1;
         }
+
+        cp.objectInfo = new NetworkObjectInfo(animator.gameObject.GetInstanceID()+"", NetworkObjectType.playerCharacter, uid);
 
         return cp;
     }

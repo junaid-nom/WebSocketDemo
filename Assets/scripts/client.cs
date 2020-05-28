@@ -29,9 +29,21 @@ public static class BinarySerializer
     }
 }
 
-public class client : MonoBehaviour
+public class NetworkObjectClient
+{
+    public GameObject gameObject;
+    public NetworkObjectInfo objectInfo;
+    public System.DateTime timeSinceHeartbeat; // delete after secondsBeforeDestroyNetworkObject if you don't see any messages about the gobj anymore
+
+}
+
+public class Client : MonoBehaviour
 {
     public bool autoStartClient;
+    public static Dictionary<string, NetworkObjectClient> objIDToObject;
+    public static MessageManager clientMsgMan = new MessageManager();
+
+    public static string myUID;
 
     WebSocket ws;
     // Start is called before the first frame update
@@ -46,7 +58,46 @@ public class client : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        StringMessage sm = clientMsgMan.popMessage<StringMessage>();
+        while (sm != null)
+        {
+            if (sm.str.Contains("userid:"))
+            {
+                myUID = sm.str.Replace("userid:", "");
+            }
+            else
+            {
+                NetDebug.printBoth("Client got str message: " + sm.str);
+            }
+            sm = clientMsgMan.popMessage<StringMessage>();
+        }
+
+        CopyMovement cp = clientMsgMan.popMessage<CopyMovement>();
+        while (cp != null)
+        {
+            processCopyMovement(cp);
+            cp = clientMsgMan.popMessage<CopyMovement>();
+        }
+
+        // TODO: Check all the values of dict, if their timeSinceHeartBeat is big, delete the game object and remove from the dict
+    }
+
+    public void processCopyMovement(CopyMovement cp)
+    {
+        string k = cp.objectInfo.objectID;
+        if (cp.objectInfo.uid == myUID)
+        {
+            cp.ignoreRotation = true;
+        }
+        if (objIDToObject.ContainsKey(k))
+        {
+            objIDToObject[k].gameObject.GetComponent<copyFromStruct>().setMovement(cp);
+        } else
+        {
+            // TODO:
+            // create new game object of type blah
+            // add dictionary entry
+        }
     }
 
     public void startClient()
@@ -64,14 +115,15 @@ public class client : MonoBehaviour
         {
             //NetDebug.printBoth("Client Received: " + (msg));
             Message deser = (Message)BinarySerializer.Deserialize(msg);
-            NetDebug.printBoth("Client got msg type: " + deser.msgType);
+            clientMsgMan.addMessage(deser);
+            //NetDebug.printBoth("Client got msg type: " + deser.msgType);
             MessageManager.debugMsg(deser);
         };
         ws.OnOpen += () =>
         {
-            NetDebug.printBoth("Client sending string msg then userinput");
-            ws.Send(BinarySerializer.Serialize(new StringMessage("ClientOpenTest")));
-            ws.Send(BinarySerializer.Serialize(testInp));
+            //NetDebug.printBoth("Client sending string msg then userinput");
+            //ws.Send(BinarySerializer.Serialize(new StringMessage("ClientOpenTest")));
+            //ws.Send(BinarySerializer.Serialize(testInp));
         };
         ws.OnError += (string errMsg) => NetDebug.printBoth("got on error " + errMsg);
         ws.OnClose += (WebSocketCloseCode code) => NetDebug.printBoth("got on close " + code);

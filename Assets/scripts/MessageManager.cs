@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+public enum NetworkObjectType
+{
+    playerCharacter,
+}
+
 [Serializable]
 public class Message
 {
@@ -10,8 +15,24 @@ public class Message
 }
 
 [Serializable]
+public class NetworkObjectInfo
+{
+    public string objectID; //gameobject id on server usually
+    public NetworkObjectType objectType;
+    public string uid; // user id of the "owner" sometimes blank for npc style objects
+
+    public NetworkObjectInfo(string objectID, NetworkObjectType objectType, string uid)
+    {
+        this.objectID = objectID;
+        this.objectType = objectType;
+        this.uid = uid;
+    }
+}
+
+[Serializable]
 public class CopyMovement : Message
 {
+    public NetworkObjectInfo objectInfo;
     public SerializableVector3 localPosition;
     public SerializableQuaternion localRotation;
     public string anim_state;
@@ -71,6 +92,41 @@ public class StringMessage : Message
         str = toSend;
     }
 }
+
+// Using these 2 for... silly reasons basically a way to communicate from the websocket to the unity thread
+[Serializable]
+public class CloseMessage : Message
+{
+    public CloseMessage()
+    {
+        msgType = 4;
+    }
+}
+[Serializable]
+public class OpenMessage : Message
+{
+    public OpenMessage()
+    {
+        msgType = 5;
+    }
+}
+
+// combine messages into one big list to make traffic less crazy
+[Serializable]
+public class ListMessage : Message
+{
+    public List<Message> messageArray;
+    public ListMessage()
+    {
+        msgType = 6;
+    }
+    public ListMessage(List<Message> messageArray)
+    {
+        msgType = 6;
+        this.messageArray = messageArray;
+    }
+}
+
 
 // meant to hold msgs per User
 public class MessageManager

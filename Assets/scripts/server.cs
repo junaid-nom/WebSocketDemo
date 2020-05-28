@@ -45,7 +45,16 @@ public class StoreMessages : WebSocketBehavior
         Send(BinarySerializer.Serialize(cptest));
         */
     }
-    
+
+    protected override void OnOpen()
+    {
+        newMsgs.Add(new GotMessage(ID, new OpenMessage()));
+    }
+
+    protected override void OnClose(CloseEventArgs e)
+    {
+        newMsgs.Add(new GotMessage(ID, new CloseMessage()));
+    }
 }
 
 public class DebugLogWriter : System.IO.TextWriter
@@ -69,10 +78,30 @@ public class DebugLogWriter : System.IO.TextWriter
     }
 }
 
+public static class BetterDict
+{
+    public static void AddOrCreate<TKey, TCollection, TValue>(
+    this Dictionary<TKey, TCollection> dictionary, TKey key, TValue value)
+    where TCollection : ICollection<TValue>, new()
+    {
+        TCollection collection;
+        if (!dictionary.TryGetValue(key, out collection))
+        {
+            collection = new TCollection();
+            dictionary.Add(key, collection);
+        }
+        collection.Add(value);
+    }
+}
+
+
+
 public class Server : MonoBehaviour
 {
     private static Dictionary<string, UserManager> uidToUserM = new Dictionary<string, UserManager>();
-    WebSocketServer wssv = null;
+    private static Dictionary<string, List<Message>> uidToMessageQueue = new Dictionary<string, List<Message>>();
+    private static List<Message> broadcastMessageQueue = new List<Message>();
+    static WebSocketServer wssv = null;
     public bool autoStartServer;
 
     // Start is called before the first frame update
@@ -95,7 +124,23 @@ public class Server : MonoBehaviour
             StoreMessages.newMsgs.RemoveAt(0);
         }
         
+        // Call update on all UserManagers.
+        foreach (var um in uidToUserM.Values)
+        {
+            um.customUpdate();
+        }
+
+        // Send all messages out at once in a big list
+        foreach (var msgs in uidToMessageQueue)
+        {
+            wssv.WebSocketServices["/"].Sessions.SendTo(BinarySerializer.Serialize(new ListMessage(msgs.Value)), msgs.Key);
+            msgs.Value.Clear();
+        }
+        wssv.WebSocketServices["/"].Sessions.Broadcast(BinarySerializer.Serialize(new ListMessage(broadcastMessageQueue)));
+        broadcastMessageQueue.Clear();
     }
+    
+    
 
     void transferNewMessage(GotMessage gm)
     {
@@ -107,6 +152,21 @@ public class Server : MonoBehaviour
             um = Server.getUserManager(gm.uid);
         }
         um.addMessage(gm.m);
+    }
+
+    public static void sendToSpecificUser(string uid, Message m)
+    {
+        string connID = uidToUserM[uid].currentConnID;
+        //byte[] serializedMsg = BinarySerializer.Serialize(m);
+        uidToMessageQueue.AddOrCreate<string, List<Message>, Message> (connID, m);
+        //wssv.WebSocketServices["/"].Sessions.SendTo(serializedMsg, connID);
+    }
+
+    public static void sendToAll(Message m)
+    {
+        byte[] serializedMsg = BinarySerializer.Serialize(m);
+        //wssv.WebSocketServices["/"].Sessions.Broadcast(serializedMsg);
+        broadcastMessageQueue.Add(m);
     }
 
     public static UserManager getUserManager(string uid)
@@ -124,7 +184,13 @@ public class Server : MonoBehaviour
     {
         UserManager newum = gameObject.AddComponent<UserManager>();
         uidToUserM.Add(uid, newum);
-        newum.startup(uid, Constants.playerCharacterPrefab, new Vector3(0, 0, 0));
+        newum.startup(uid, uid, Constants.playerCharacterPrefab, new Vector3(0, 0, 0));
+    }
+
+    public void removeUserManager(string uid)
+    {
+        // Remove from both uid dicts
+        // Delete component
     }
 
     public void startServer()

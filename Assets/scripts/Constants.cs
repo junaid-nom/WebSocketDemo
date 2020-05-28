@@ -10,5 +10,12 @@ public class Constants : MonoBehaviour
     public static readonly string[] charStateNames = { "anim1", "anim2", "anim3_flip" };
 
     public static GameObject playerCharacterPrefab;
+
+    public static int secondsBeforeDestroyNetworkObject;
+
+    void Awake()
+    {
+        playerCharacterPrefab = Resources.Load<GameObject>("copyControlledPlayer");
+    }
 }
 

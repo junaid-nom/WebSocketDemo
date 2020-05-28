@@ -22,6 +22,7 @@ public class UserManager : MonoBehaviour
     Animator playerAnimator;
     private bool startUp;
     InputBuffer inputBuffer = new InputBuffer();
+    public string currentConnID;
 
     // Start is called before the first frame update
     void Start()
@@ -34,7 +35,7 @@ public class UserManager : MonoBehaviour
         usernet.msgMan.addMessage(m);
     }
 
-    public void startup(string userid, GameObject playerprefab, Vector3 spawnLocation)
+    public void startup(string userid, string connID, GameObject playerprefab, Vector3 spawnLocation)
     {
         if (!startUp)
         {
@@ -45,6 +46,7 @@ public class UserManager : MonoBehaviour
 
             usernet = new UserNetworkProcessor(userid);
             startUp = true;
+            currentConnID = connID;
         }
         else
         {
@@ -71,15 +73,29 @@ public class UserManager : MonoBehaviour
                 inputBuffer.receiveInput(ui);
             }
             UserInput finalui = inputBuffer.getInput();
-            playerCopyController.setMovement(InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charStateNames)));
+            CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charStateNames), currentConnID);
+            playerCopyController.setMovement(cp);
+            Server.sendToAll(cp);
         }
     }
 
+    void processOpenMessage()
+    {
+        // Send to that player a message telling them their connection/userID
+        Server.sendToSpecificUser(currentConnID, new StringMessage("userid:"+currentConnID));
+    }
+
+    void processCloseMessage()
+    {
+        deleteSelf();
+    }
+
     // Use LateUpdate so Server has a chance to process all the message that came in this frame
-    void LateUpdate()
+    public void customUpdate()
     {
         if (startUp)
         {
+            processOpenMessage();
             processUserInputs();
 
             // Send info about self to Server to broadcast
@@ -89,6 +105,8 @@ public class UserManager : MonoBehaviour
             {
                 deleteSelf();
             }
+            //Send Info about playerCharacter here. 
+            // If we dont client will assume it died
         }
     }
 
