@@ -128,7 +128,7 @@ public class ListMessage : Message
 }
 
 
-// meant to hold msgs per User
+// meant to hold msgs that will be READ not sent
 public class MessageManager
 {
     private Dictionary<System.Type, List<Message>> msgs = new Dictionary<System.Type, List<Message>>();
@@ -137,6 +137,21 @@ public class MessageManager
     public DateTime LastMessageTime { get => lastMessageTime; }
 
     public void addMessage(Message msg)
+    {
+        System.Type msgType = msg.GetType();
+        if (msgType == typeof(ListMessage))
+        {
+            ListMessage lmsg = (ListMessage)msg;
+            lmsg.messageArray.ForEach(addSingleMsg);
+        }
+        else
+        {
+            addSingleMsg(msg);
+        }
+        
+    }
+
+    void addSingleMsg(Message msg)
     {
         System.Type msgType = msg.GetType();
         if (!msgs.ContainsKey(msgType))
