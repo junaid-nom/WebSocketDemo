@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4526716443191717520}
   - component: {fileID: 4526716443191717522}
   - component: {fileID: 4526716443191717523}
-  - component: {fileID: 4526716443191717517}
   m_Layer: 0
   m_Name: controlledPlayer
   m_TagString: Untagged
@@ -67,26 +66,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 4526716443191717522}
---- !u!114 &4526716443191717517
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4526716443191717521}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c506812e11743a4bb320edc73d57b83, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  objectToControl: {fileID: 4526716443191717521}
-  instantFeedbackObject: {fileID: 0}
-  stateNames:
-  - anim1
-  - anim2
-  - anim3_flip
-  canMoveState: defAnim
-  speed: 20
 --- !u!1 &4526716443743390935
 GameObject:
   m_ObjectHideFlags: 0

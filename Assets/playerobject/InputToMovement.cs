@@ -16,7 +16,7 @@ public class InputBuffer
     public void receiveInput(UserInput inp)
     {
         receivedInput.Add(inp);
-        Debug.Log("Got inp" + inp);
+        //Debug.Log("Got inp" + inp);
     }
 
     public UserInput getInput()
@@ -143,19 +143,40 @@ public class InputToMovement : MonoBehaviour
 
 
     //// Update is called once per frame
-    //void Update()
-    //{
-    //    //StartCoroutine(SendInputAfterTime(sendPingSecs, getInput(), copying));
-    //    UserInput nowInput = getInput();
+    void Update()
+    {
+        //StartCoroutine(SendInputAfterTime(sendPingSecs, getInput(), copying));
 
-    //    StartCoroutine(SendInputAfterTime(sendPingSecs, nowInput)); // all movement is delayed, but locally change the rotation right away
+        if (Client.ws != null 
+            && Client.ws.GetState() == HybridWebSocket.WebSocketState.Open)
+        {
+            UserInput nowInput = getInput();
+            //Send msg to server
+            Client.ws.Send(BinarySerializer.Serialize(nowInput));
+
+            // Get my GameObject, update its rotation right away
+            if (Client.objIDToObject.ContainsKey(Client.myUID))
+            {
+                GameObject myChar = Client.objIDToObject[Client.myUID].gameObject;
+                Animator instantFeedbackAnimator = myChar.GetComponent<Animator>();
+                bool canChange = instantFeedbackAnimator.GetCurrentAnimatorStateInfo(0).IsName(Constants.canMoveState);
+                if (canChange && (nowInput.x != 0 || nowInput.y != 0))
+                    myChar.transform.localRotation = getRotationFromInput(nowInput);
+                
+            }
+            
+        }
+        
 
 
-    //    bool canChange = instantFeedbackAnimator.GetCurrentAnimatorStateInfo(0).IsName(canMoveState);
-    //    if (canChange && (nowInput.x != 0 || nowInput.y != 0))
-    //        instantFeedbackObject.transform.localRotation = getRotationFromInput(nowInput);
+        //StartCoroutine(SendInputAfterTime(sendPingSecs, nowInput)); // all movement is delayed, but locally change the rotation right away
 
-    //    UserInput delayedInp = inputBuffer.getInput();
-    //    copying.setMovement(inputToMovement(delayedInp, objectToControl.transform.localPosition, objectToControl.transform.localRotation, speed, animator, canMoveState, stateNames));
-    //}
+
+        //bool canChange = instantFeedbackAnimator.GetCurrentAnimatorStateInfo(0).IsName(canMoveState);
+        //if (canChange && (nowInput.x != 0 || nowInput.y != 0))
+        //    instantFeedbackObject.transform.localRotation = getRotationFromInput(nowInput);
+
+        //UserInput delayedInp = inputBuffer.getInput();
+        //copying.setMovement(inputToMovement(delayedInp, objectToControl.transform.localPosition, objectToControl.transform.localRotation, speed, animator, canMoveState, stateNames));
+    }
 }

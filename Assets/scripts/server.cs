@@ -116,28 +116,32 @@ public class Server : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Use while loop and remove 1 at a time so that its more thread safe.
-        // If you clear whole list, maybe a message was added right before you cleared.
-        while (StoreMessages.newMsgs.Count > 0)
+        if (wssv != null && wssv.IsListening)
         {
-            transferNewMessage(StoreMessages.newMsgs[0]);
-            StoreMessages.newMsgs.RemoveAt(0);
+            // Use while loop and remove 1 at a time so that its more thread safe.
+            // If you clear whole list, maybe a message was added right before you cleared.
+            while (StoreMessages.newMsgs.Count > 0)
+            {
+                transferNewMessage(StoreMessages.newMsgs[0]);
+                StoreMessages.newMsgs.RemoveAt(0);
+            }
+
+            // Call update on all UserManagers.
+            foreach (var um in uidToUserM.Values)
+            {
+                um.customUpdate();
+            }
+
+            // Send all messages out at once in a big list
+            foreach (var msgs in uidToMessageQueue)
+            {
+                wssv.WebSocketServices["/"].Sessions.SendTo(BinarySerializer.Serialize(new ListMessage(msgs.Value)), msgs.Key);
+                msgs.Value.Clear();
+            }
+            wssv.WebSocketServices["/"].Sessions.Broadcast(BinarySerializer.Serialize(new ListMessage(broadcastMessageQueue)));
+            broadcastMessageQueue.Clear();
         }
         
-        // Call update on all UserManagers.
-        foreach (var um in uidToUserM.Values)
-        {
-            um.customUpdate();
-        }
-
-        // Send all messages out at once in a big list
-        foreach (var msgs in uidToMessageQueue)
-        {
-            wssv.WebSocketServices["/"].Sessions.SendTo(BinarySerializer.Serialize(new ListMessage(msgs.Value)), msgs.Key);
-            msgs.Value.Clear();
-        }
-        wssv.WebSocketServices["/"].Sessions.Broadcast(BinarySerializer.Serialize(new ListMessage(broadcastMessageQueue)));
-        broadcastMessageQueue.Clear();
     }
     
     

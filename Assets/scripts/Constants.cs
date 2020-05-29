@@ -11,11 +11,11 @@ public class Constants : MonoBehaviour
 
     public static GameObject playerCharacterPrefab;
 
-    public static int secondsBeforeDestroyNetworkObject;
+    public const int secondsBeforeDestroyNetworkObject = 10;
 
     void Awake()
     {
-        playerCharacterPrefab = Resources.Load<GameObject>("copyControlledPlayer");
+        playerCharacterPrefab = Resources.Load<GameObject>("controlledPlayer");
     }
 }
 
