@@ -155,13 +155,20 @@ public class InputToMovement : MonoBehaviour
             Client.ws.Send(BinarySerializer.Serialize(nowInput));
 
             // Get my GameObject, update its rotation right away
-            if (Client.objIDToObject.ContainsKey(Client.myUID))
+            if (Client.myobjsByType.ContainsKey(System.Enum.GetName(typeof(NetworkObjectType), NetworkObjectType.playerCharacter)))
             {
-                GameObject myChar = Client.objIDToObject[Client.myUID].gameObject;
+                Debug.Log("Got myobj");
+                string myObjID = Client.myobjsByType[System.Enum.GetName(typeof(NetworkObjectType), NetworkObjectType.playerCharacter)][0];
+                GameObject myChar = Client.objIDToObject[myObjID].gameObject;
                 Animator instantFeedbackAnimator = myChar.GetComponent<Animator>();
                 bool canChange = instantFeedbackAnimator.GetCurrentAnimatorStateInfo(0).IsName(Constants.canMoveState);
+                Debug.Log("can change:" + canChange + " xy: " + (nowInput.x != 0 || nowInput.y != 0));
                 if (canChange && (nowInput.x != 0 || nowInput.y != 0))
+                {
                     myChar.transform.localRotation = getRotationFromInput(nowInput);
+                    Debug.Log("Set Rot Local: " + getRotationFromInput(nowInput));
+                }
+                    
                 
             }
             

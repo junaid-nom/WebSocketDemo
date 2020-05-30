@@ -148,8 +148,12 @@ public class Server : MonoBehaviour
 
     void transferNewMessage(GotMessage gm)
     {
+        if (gm.uid == null)
+        {
+            Debug.LogWarning("Got null conn id msg: " + gm.m.GetType());
+        }
         UserManager um = getUserManager(gm.uid);
-
+        
         if (um == null)
         {
             addUserManager(gm.uid);

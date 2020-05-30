@@ -51,6 +51,7 @@ public class Client : MonoBehaviour
     public static MessageManager clientMsgMan = new MessageManager();
 
     public static string myUID = "";
+    public static Dictionary<string, List<string>> myobjsByType = new Dictionary<string, List<string>>();
 
     public static WebSocket ws;
     // Start is called before the first frame update
@@ -71,6 +72,7 @@ public class Client : MonoBehaviour
             if (sm.str.Contains("userid:"))
             {
                 myUID = sm.str.Replace("userid:", "");
+                Debug.Log("Got myuid:" + myUID);
             }
             else
             {
@@ -112,6 +114,7 @@ public class Client : MonoBehaviour
         if (cp.objectInfo.uid == myUID)
         {
             cp.ignoreRotation = true;
+            myobjsByType.AddOrCreate<string, List<string>, string>(Enum.GetName(typeof(NetworkObjectType), NetworkObjectType.playerCharacter), k);
         }
         if (objIDToObject.ContainsKey(k))
         {
@@ -122,6 +125,8 @@ public class Client : MonoBehaviour
             // :
             // create new game object of type blah
             GameObject ng = Instantiate(Constants.playerCharacterPrefab);
+            ng.name = "CLIENT" + ng.name;
+            Debug.Log("Adding obj k:" + k);
             // add dictionary entry
             objIDToObject.Add(k, new NetworkObjectClient(ng, cp.objectInfo, System.DateTime.Now));
         }

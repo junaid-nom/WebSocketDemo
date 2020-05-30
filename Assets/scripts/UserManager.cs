@@ -81,13 +81,20 @@ public class UserManager : MonoBehaviour
 
     void processOpenMessage()
     {
-        // Send to that player a message telling them their connection/userID
-        Server.sendToSpecificUser(currentConnID, new StringMessage("userid:"+currentConnID));
+        if (usernet.msgMan.popAllMessages<OpenMessage>() != null)
+        {
+            // Send to that player a message telling them their connection/userID
+            Server.sendToSpecificUser(currentConnID, new StringMessage("userid:" + currentConnID));
+        }
     }
 
     void processCloseMessage()
     {
-        deleteSelf();
+        if (usernet.msgMan.popAllMessages<CloseMessage>() != null)
+        {
+            deleteSelf();
+        }
+        
     }
 
     // Use LateUpdate so Server has a chance to process all the message that came in this frame
@@ -117,6 +124,7 @@ public class UserManager : MonoBehaviour
         // remove from server List of UserManagers
         // Destroy any related objects like playerCharacter
         // destory self (component)
+        // send DestroyObject message to all
     }
 }
 
