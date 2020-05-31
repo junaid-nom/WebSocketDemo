@@ -14,6 +14,7 @@ using UnityEngine;
 public class copyFromStruct : MonoBehaviour
 {
     public Animator animator;
+    public Collider playerHitBox;
     // Start is called before the first frame update
     void Start()
     {
@@ -28,7 +29,34 @@ public class copyFromStruct : MonoBehaviour
 
     public void setMovement(CopyMovement mv)
     {
-        transform.localPosition = mv.localPosition;
+        if (Server.isOn)
+        {
+            RaycastHit hit;
+            Vector3 start = transform.position;
+            Vector3 dir = (mv.localPosition - transform.localPosition);
+            float dist = (mv.localPosition - transform.localPosition).magnitude + Constants.playerWidth; //1 being size of capsule rougly
+            int layermask = Constants.blockMovementMask;
+            bool gotHit = Physics.Raycast(start, dir, out hit, dist, layermask);
+            
+            Debug.DrawRay(start, dir * dist, Color.red, 1);
+
+            if (!gotHit)
+            {
+                transform.localPosition = mv.localPosition;
+            } else
+            {
+                if (hit.collider != null)
+                    Debug.Log("Got hit:" + hit.collider.gameObject.name);
+                else
+                {
+                    Debug.Log("wthit:" + layermask);
+                }
+            }
+        } else
+        {
+            transform.localPosition = mv.localPosition;
+        }
+        
         if (!mv.ignoreRotation)
         {
             transform.localRotation = mv.localRotation;

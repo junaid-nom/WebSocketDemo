@@ -41,12 +41,12 @@ public class UserManager : MonoBehaviour
         {
             playerPrefab = playerprefab;
 
-            // Create playerCharacter here, spawn somewhere
-            createPlayerCharacter(spawnLocation);
-
             usernet = new UserNetworkProcessor(userid);
             startUp = true;
             currentConnID = connID;
+
+            // Create playerCharacter here, spawn somewhere
+            createPlayerCharacter(spawnLocation);
         }
         else
         {
@@ -60,6 +60,8 @@ public class UserManager : MonoBehaviour
         playerCharacter.transform.localPosition = spawnLocation;
         playerCopyController = playerCharacter.GetComponent<copyFromStruct>();
         playerAnimator = playerCharacter.GetComponent<Animator>();
+        PlayerObject po = playerCharacter.GetComponent<PlayerObject>();
+        po.uid = usernet.uid;
     }
 
     void processUserInputs()
@@ -72,11 +74,12 @@ public class UserManager : MonoBehaviour
             {
                 inputBuffer.receiveInput(ui);
             }
-            UserInput finalui = inputBuffer.getInput();
-            CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charStateNames), currentConnID);
-            playerCopyController.setMovement(cp);
-            Server.sendToAll(cp);
+            
         }
+        UserInput finalui = inputBuffer.getInput();
+        CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charStateNames), currentConnID);
+        playerCopyController.setMovement(cp);
+        Server.sendToAll(cp);
     }
 
     void processOpenMessage()

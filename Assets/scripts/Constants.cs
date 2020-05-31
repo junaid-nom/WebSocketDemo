@@ -12,10 +12,26 @@ public class Constants : MonoBehaviour
     public static GameObject playerCharacterPrefab;
 
     public const int secondsBeforeDestroyNetworkObject = 10;
+    public const float playerWidth = .5f;
 
     void Awake()
     {
         playerCharacterPrefab = Resources.Load<GameObject>("controlledPlayer");
+        blockMovementMask = LayerMask.GetMask(new string[] { "wall", "player" });
+    }
+
+    public static int blockMovementMask;
+
+
+    public static T getComponentInParentOrChildren<T>(GameObject g) where T: Component
+    {
+        T r = null;
+        r = g.GetComponentInChildren<T>();
+        if (r == null)
+        {
+            r = g.GetComponentInParent<T>();
+        }
+        return r;
     }
 }
 

@@ -30,6 +30,10 @@ public class StoreMessages : WebSocketBehavior
 
         //Send(e.Data + " t: " + System.DateTime.Now.ToString("h:mm:ss tt"));
         Message deser = (Message)BinarySerializer.Deserialize(e.RawData);
+        if (deser == null)
+        {
+            Debug.LogWarning("Got null msg????" + deser + " raw: " + e.RawData);
+        }
         newMsgs.Add(new GotMessage(ID, deser));
 
         /*
@@ -103,6 +107,7 @@ public class Server : MonoBehaviour
     private static List<Message> broadcastMessageQueue = new List<Message>();
     static WebSocketServer wssv = null;
     public bool autoStartServer;
+    public static bool isOn = false;
 
     // Start is called before the first frame update
     void Start()
@@ -150,7 +155,13 @@ public class Server : MonoBehaviour
     {
         if (gm.uid == null)
         {
-            Debug.LogWarning("Got null conn id msg: " + gm.m.GetType());
+            if (gm.m != null)
+                Debug.LogWarning("Got null conn id msg: " + gm.m.GetType());
+            else
+            {
+                Debug.LogWarning("Got null conn id msg: " + gm.m);
+            }
+            return;
         }
         UserManager um = getUserManager(gm.uid);
         
@@ -203,8 +214,8 @@ public class Server : MonoBehaviour
 
     public void startServer()
     {
+        isOn = true;
         System.Console.SetOut(new DebugLogWriter());
-
         NetDebug.printBoth("about to start wssv ");
         wssv = new WebSocketServer("ws://127.0.0.1:7268");
         wssv.AddWebSocketService<StoreMessages>("/");

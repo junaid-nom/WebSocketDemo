@@ -125,7 +125,12 @@ public class Client : MonoBehaviour
             // :
             // create new game object of type blah
             GameObject ng = Instantiate(Constants.playerCharacterPrefab);
+            ng.GetComponent<PlayerObject>().uid = cp.objectInfo.uid;
             ng.name = "CLIENT" + ng.name;
+            if (Server.isOn)
+            {
+                ng.SetActive(false);
+            }
             Debug.Log("Adding obj k:" + k);
             // add dictionary entry
             objIDToObject.Add(k, new NetworkObjectClient(ng, cp.objectInfo, System.DateTime.Now));
