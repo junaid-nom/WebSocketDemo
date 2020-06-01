@@ -11,6 +11,8 @@ public class Health : MonoBehaviour
 
     public ColorChanger invulChange;
     public Color invulColor;
+
+    public Animator getHitAnimator;
     // Start is called before the first frame update
     void Start()
     {
@@ -25,8 +27,16 @@ public class Health : MonoBehaviour
 
     public void changeHealth(float change)
     {
-        health += change * damageTakenMultiplier;
-        hpbar.setHPScale(health / startHP);
+        float changeApply = change * damageTakenMultiplier;
+        if (changeApply != 0)
+        {
+            health += changeApply;
+            hpbar.setHPScale(health / startHP);
+            // APPLY GET HIT HERE...
+            getHitAnimator.StopPlayback();
+            getHitAnimator.Play(Constants.getHitState, 0, 0);
+        }
+
     }
 
     public void setDamageTakenMultiplier(float multi)

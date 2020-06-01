@@ -1,38 +1,62 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 
+public class InputTimed
+{
+    public System.DateTime created;
+    public UserInput inp;
+
+    public InputTimed(DateTime created, UserInput inp)
+    {
+        this.created = created;
+        this.inp = inp;
+    }
+}
+
 public class InputBuffer
 {
-    List<UserInput> receivedInput; // Right now only need the very last input. if this was more complex game with fighting game style inputs then would need a list
+    List<InputTimed> receivedInput; // Right now only need the very last input. if this was more complex game with fighting game style inputs then would need a list
 
     // Start is called before the first frame update
     public InputBuffer()
     {
-        receivedInput = new List<UserInput>();
+        receivedInput = new List<InputTimed>();
     }
 
     public void receiveInput(UserInput inp)
     {
-        receivedInput.Add(inp);
+        receivedInput.Add(new InputTimed(System.DateTime.Now, inp));
         //Debug.Log("Got inp" + inp);
+    }
+
+    void clearOld()
+    {
+        receivedInput = receivedInput.FindAll(inps => Constants.timeDiff(System.DateTime.Now, inps.created).TotalMilliseconds <= Constants.inputLifetimeMS);
+    }
+
+    public void clearBuffer()
+    {
+        receivedInput.Clear();
     }
 
     public UserInput getInput()
     {
+        clearOld();
         UserInput inp;
         if (receivedInput.Count > 0)
         {
             UserInput combined = new UserInput();
-            UserInput lastInp = receivedInput[receivedInput.Count - 1];
+            UserInput lastInp = receivedInput[receivedInput.Count - 1].inp;
             combined.x = lastInp.x;
             combined.y = lastInp.y;
             
-            List<UserInput> pressed = receivedInput.FindAll(inps => inps.buttonsDown.Contains(true));
+            List<InputTimed> pressed = receivedInput.FindAll(inps => inps.inp.buttonsDown.Contains(true));
             if (pressed.Count > 0)
             {
-                combined.buttonsDown = pressed[pressed.Count - 1].buttonsDown;
+                combined.buttonsDown = pressed[pressed.Count - 1].inp.buttonsDown;
             }
             else
             {
@@ -40,7 +64,6 @@ public class InputBuffer
             }
 
             inp = combined;
-            receivedInput.RemoveRange(0, receivedInput.Count - 2); // remove all but the last one
         }
         else
         {
@@ -85,6 +108,7 @@ public class InputToMovement : MonoBehaviour
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(0));
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(1));
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(2));
+        newInp.buttonsDown.Add(Input.GetButton("dodge"));
 
         return newInp;
     }
@@ -99,6 +123,15 @@ public class InputToMovement : MonoBehaviour
     {
         CopyMovement cp = new CopyMovement();
         bool canChange = animator.GetCurrentAnimatorStateInfo(0).IsName(canChangeState);
+        bool canDodge = false;
+        foreach (string s in Constants.dodgeFromStates)
+        {
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName(s))
+            {
+                canDodge = true;
+            }
+        }
+            
         if (canChange && (inp.x != 0 || inp.y != 0))
         {
             Vector3 direction = new Vector3(inp.x, 0, inp.y).normalized;
@@ -113,13 +146,25 @@ public class InputToMovement : MonoBehaviour
         }
 
         int index = inp.buttonsDown.FindIndex(u => u);
-        if (canChange && index >= 0)
+        
+        if (canDodge && inp.buttonsDown != null && inp.buttonsDown.Count >=3 && inp.buttonsDown[3])
+        {
+            cp.anim_state = stateNames[3];
+            cp.normalizedTime = 0;
+        }
+        else if (animator.GetCurrentAnimatorStateInfo(0).IsName(Constants.getHitState))
+        {
+            cp.anim_state = Constants.getHitState;
+            cp.normalizedTime = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+        }
+        else if (canChange && index >= 0)
         {
             cp.anim_state = stateNames[index];
             cp.normalizedTime = 0;
         }
         else
         {
+            // TODO: This is kinda weird cause if the user misses the message where we told them the anim state started, they won't see any animation. But I guess because its websockets its fine, but if it was UDP it wouldn't be
             cp.anim_state = null;
             cp.normalizedTime = -1;
         }

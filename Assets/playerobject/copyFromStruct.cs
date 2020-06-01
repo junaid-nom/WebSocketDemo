@@ -45,8 +45,10 @@ public class copyFromStruct : MonoBehaviour
                 transform.localPosition = mv.localPosition;
             } else
             {
-                if (hit.collider != null)
-                    Debug.Log("Got hit:" + hit.collider.gameObject.name);
+                if (hit.collider != null && hit.collider.gameObject != playerHitBox.gameObject)
+                {
+                    Debug.Log(playerHitBox.gameObject.GetInstanceID() + " " + this.gameObject.GetInstanceID() + " Got hit:" + hit.collider.gameObject.name + " " + hit.collider.gameObject.GetInstanceID());
+                }
                 else
                 {
                     Debug.Log("wthit:" + layermask);

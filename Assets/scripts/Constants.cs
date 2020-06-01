@@ -6,8 +6,13 @@ public class Constants : MonoBehaviour
 {
     public const float charMoveSpeed = 20;
 
+    public const int inputLifetimeMS = 400;
+
     public const string canMoveState = "defAnim";
-    public static readonly string[] charStateNames = { "anim1", "anim2", "anim3_flip" };
+    public const string getHitState = "getHit";
+    public static readonly string[] charUserControlledStateNames = { "anim1", "anim2", "anim3_flip", "dodge" };
+    public static readonly string[] dodgeFromStates = { getHitState, canMoveState };
+    
 
     public static GameObject playerCharacterPrefab;
 
@@ -32,6 +37,11 @@ public class Constants : MonoBehaviour
             r = g.GetComponentInParent<T>();
         }
         return r;
+    }
+
+    public static System.TimeSpan timeDiff(System.DateTime timenow, System.DateTime timepast)
+    {
+        return timenow.Subtract(timepast);
     }
 }
 

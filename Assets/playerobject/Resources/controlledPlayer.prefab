@@ -198,6 +198,7 @@ MonoBehaviour:
   damageTakenMultiplier: 1
   invulChange: {fileID: 518486778}
   invulColor: {r: 1, g: 0.995283, b: 0.995283, a: 1}
+  getHitAnimator: {fileID: 4526716443191717522}
 --- !u!114 &3733008155849178468
 MonoBehaviour:
   m_ObjectHideFlags: 0
