@@ -123,6 +123,9 @@ public class Server : MonoBehaviour
     {
         if (wssv != null && wssv.IsListening)
         {
+            // TODO: Bots generate fake messages here. Probably just UserInput msgs.
+            // Add them to StoreMessages.newMsgs
+
             // Use while loop and remove 1 at a time so that its more thread safe.
             // If you clear whole list, maybe a message was added right before you cleared.
             while (StoreMessages.newMsgs.Count > 0)
@@ -179,6 +182,8 @@ public class Server : MonoBehaviour
         //byte[] serializedMsg = BinarySerializer.Serialize(m);
         uidToMessageQueue.AddOrCreate<string, List<Message>, Message> (connID, m);
         //wssv.WebSocketServices["/"].Sessions.SendTo(serializedMsg, connID);
+
+        // TODO: if uid is server (bot), then send to them directly
     }
 
     public static void sendToAll(Message m)
@@ -186,6 +191,8 @@ public class Server : MonoBehaviour
         byte[] serializedMsg = BinarySerializer.Serialize(m);
         //wssv.WebSocketServices["/"].Sessions.Broadcast(serializedMsg);
         broadcastMessageQueue.Add(m);
+
+        // TODO: Send msg directly to all things with UID that has server in it
     }
 
     public static UserManager getUserManager(string uid)

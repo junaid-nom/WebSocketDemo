@@ -122,6 +122,7 @@ public class InputToMovement : MonoBehaviour
     public static CopyMovement inputToMovement(UserInput inp, Vector3 oldPositionLocal, Quaternion oldRotationLocal, float speed, Animator animator, string canChangeState, List<string> stateNames, string uid)
     {
         CopyMovement cp = new CopyMovement();
+        // Have to use IsName because you can't check animation state directly. Though you can check animation clip I didn't here.
         bool canChange = animator.GetCurrentAnimatorStateInfo(0).IsName(canChangeState);
         bool canDodge = false;
         foreach (string s in Constants.dodgeFromStates)
