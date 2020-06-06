@@ -572,6 +572,7 @@ GameObject:
   - component: {fileID: 786295375}
   - component: {fileID: 786295376}
   - component: {fileID: 786295377}
+  - component: {fileID: 786295378}
   m_Layer: 0
   m_Name: Server
   m_TagString: Untagged
@@ -618,6 +619,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56d6787001056cf40b4e53c191a7ea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _attackAnimationInfo: {fileID: 0}
+--- !u!114 &786295378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786295374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92177fc59fef0e14989b01563d72969d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animations:
+  - {fileID: 7400000, guid: 19cda3b9335aed345bae6189227ecc5d, type: 2}
+  - {fileID: 7400000, guid: fd2256961cd603644b77c46cc2105e20, type: 2}
+  - {fileID: 7400000, guid: 43d44e99f89122f4f9ba80b92532381f, type: 2}
 --- !u!224 &799965354 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 224084813030101084, guid: baff84928309d134ab74ca5cbe0cf9ee,

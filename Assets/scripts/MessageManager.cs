@@ -38,16 +38,29 @@ public class CopyMovement : Message
     public string anim_state;
     public float normalizedTime;
     public bool ignoreRotation;
+    public float health; // TODO THIS IS UNUSED NEED TO ACTUALLY DO STUFF! add Health component to copyFromtStruct. Also need to change inputToMovement function
 
     public CopyMovement()
     {
         msgType = 1;
     }
 
+    public CopyMovement(NetworkObjectInfo objectInfo, SerializableVector3 localPosition, SerializableQuaternion localRotation, string anim_state, float normalizedTime, bool ignoreRotation, float health)
+    {
+        msgType = 1;
+        this.objectInfo = objectInfo;
+        this.localPosition = localPosition;
+        this.localRotation = localRotation;
+        this.anim_state = anim_state;
+        this.normalizedTime = normalizedTime;
+        this.ignoreRotation = ignoreRotation;
+        this.health = health;
+    }
+
     public override string ToString()
     {
         return "loc:" + localPosition.ToString() + " rot: " + localRotation.ToString() + " anim: " + anim_state + " ntime: " + normalizedTime
-        + " ignoreRot: " + ignoreRotation
+        + " ignoreRot: " + ignoreRotation + " health: " + health;
         ;
     }
 }

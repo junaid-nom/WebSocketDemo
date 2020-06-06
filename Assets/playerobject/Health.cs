@@ -25,6 +25,13 @@ public class Health : MonoBehaviour
         
     }
 
+    // Should only be used by client-side to set health based on what server says
+    public void setHealth(float hp)
+    {
+        health = hp;
+        hpbar.setHPScale(health / startHP);
+    }
+
     public void changeHealth(float change)
     {
         float changeApply = change * damageTakenMultiplier;
