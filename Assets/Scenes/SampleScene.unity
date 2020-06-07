@@ -619,7 +619,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56d6787001056cf40b4e53c191a7ea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _attackAnimationInfo: {fileID: 0}
+  _attackAnimationInfo: {fileID: 786295378}
 --- !u!114 &786295378
 MonoBehaviour:
   m_ObjectHideFlags: 0

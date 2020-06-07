@@ -9,7 +9,7 @@ using System;
 
 public static class BinarySerializer
 {
-    private static readonly BinaryFormatter Formatter = new BinaryFormatter();
+    public static readonly BinaryFormatter Formatter = new BinaryFormatter();
 
     public static byte[] Serialize(object toSerialize)
     {
@@ -97,6 +97,19 @@ public class Client : MonoBehaviour
                 toDelete.Add(n.objectInfo.objectID);
             }
         }
+        DeleteMessage dm = clientMsgMan.popMessage<DeleteMessage>();
+        while (dm != null)
+        {
+            foreach(var o in objIDToObject.Values)
+            {
+                if (o.objectInfo.uid == dm.uid)
+                {
+                    toDelete.Add(o.objectInfo.objectID);
+                }
+            }
+            dm = clientMsgMan.popMessage<DeleteMessage>();
+        }
+
 
         toDelete.ForEach(deleteNetObject);
         toDelete.Clear();

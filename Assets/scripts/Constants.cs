@@ -22,6 +22,7 @@ public class WeaponInfo
 public class Constants : MonoBehaviour
 {
     public const float charMoveSpeed = 20;
+    public const float startHP = 100;
 
     public const int inputLifetimeMS = 400;
 
@@ -41,6 +42,11 @@ public class Constants : MonoBehaviour
     public AnimationInfo _attackAnimationInfo; // set in inspector
 
     public static readonly WeaponInfo swordInfo = new WeaponInfo(7, 7, 25, 40);
+
+    public const int maxBots = 10;
+
+    public const float spawnXRange = 20;
+    public const float spawnZRange = 11;
 
     void Awake()
     {

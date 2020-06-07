@@ -123,6 +123,29 @@ public static class Conditions
     {
         return Constants.attackAnimationInfo.nameToAnimation.ContainsKey(bot.charState[0].myState.anim_state);
     }
+
+    public static bool memoryIsChasing(BotState bot)
+    {
+        return bot.extraState.chasingTarget;
+    }
+
+    public static Condition selfHealthGreaterThan(float health)
+    {
+        return (bot) =>
+        {
+            return bot.charState[0].myState.health >= health;
+        };
+    }
+
+    public static Condition nearByEnemyHealthLessThan(float health, float range)
+    {
+        return (bot) =>
+        {
+            var enemiesClose = BotHelpers.getEnemies(bot).FindAll(cp => Vector3.Distance(cp.localPosition, bot.charState[0].myState.localPosition) <= range);
+            var enemiesLow = enemiesClose.FindAll(cp => cp.health <= health);
+            return enemiesLow.Count > 0;
+        };
+    }
 }
 
 public static class Behaviors

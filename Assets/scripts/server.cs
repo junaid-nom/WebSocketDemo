@@ -5,6 +5,13 @@ using WebSocketSharp;
 using System.Text;
 using WebSocketSharp.Server;
 
+using BehaviorList = System.Collections.Generic.List<System.Tuple<System.Collections.Generic.Dictionary<Condition, bool>, BotBehavior>>;
+using ConditionalBehavior = System.Tuple<System.Collections.Generic.Dictionary<Condition, bool>, BotBehavior>;
+using Conditionals = System.Collections.Generic.Dictionary<Condition, bool>;
+using ConditionalBehaviorList = System.Tuple<System.Collections.Generic.Dictionary<Condition, bool>, System.Collections.Generic.List<System.Tuple<System.Collections.Generic.Dictionary<Condition, bool>, BotBehavior>>>;
+using AIPriorityList = System.Collections.Generic.List<System.Tuple<System.Collections.Generic.Dictionary<Condition, bool>, System.Collections.Generic.List<System.Tuple<System.Collections.Generic.Dictionary<Condition, bool>, BotBehavior>>>>;
+
+
 public struct GotMessage
 {
     public string uid;
@@ -109,12 +116,29 @@ public class Server : MonoBehaviour
     public bool autoStartServer;
     public static bool isOn = false;
 
+    static Dictionary<string, Bot> uidToBot = new Dictionary<string, Bot>();
+
     // Start is called before the first frame update
     void Start()
     {
         if (autoStartServer)
         {
             startServer();
+
+            //initialize Bots
+            {
+                Bot b1 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(uidToBot.Keys.Count), null);
+                Bot b2 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(uidToBot.Keys.Count), null);
+                Bot b3 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(uidToBot.Keys.Count), null);
+                Bot b4 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(uidToBot.Keys.Count), null);
+                Bot b5 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(uidToBot.Keys.Count), null);
+
+                uidToBot.Add(b1.state.uid, b1);
+                uidToBot.Add(b2.state.uid, b2);
+                uidToBot.Add(b3.state.uid, b3);
+                uidToBot.Add(b4.state.uid, b4);
+                uidToBot.Add(b5.state.uid, b5);
+            }
         }
     }
     
@@ -123,8 +147,31 @@ public class Server : MonoBehaviour
     {
         if (wssv != null && wssv.IsListening)
         {
-            // TODO: Bots generate fake messages here. Probably just UserInput msgs.
-            // Add them to StoreMessages.newMsgs
+            // TODO: If bots are inactive, check if UserManager exists, if it does, send the OnClose message to it
+            // TODO: Bots generate artificial messages here. Probably just UserInput msgs.
+            // Add the msgs to StoreMessages.newMsgs
+            foreach (Bot bot in uidToBot.Values)
+            {
+                if (!Bots.botAlive(bot.state, 1, Constants.maxBots))
+                {
+                    if (uidToUserM.ContainsKey(bot.state.uid))
+                    {
+                        StoreMessages.newMsgs.Add(new GotMessage(bot.state.uid, new CloseMessage()));
+                    }
+                } else
+                {
+                    System.Tuple<AIPriorityList, AIMemory> result = bot.ai(bot.aiList, bot.state);
+                    bot.state.extraState = result.Item2;
+                    UserInput uinp = Bots.getBotAction(result.Item1, bot.state);
+                    if (uinp != null)
+                    {
+                        StoreMessages.newMsgs.Add(new GotMessage(bot.state.uid, uinp));
+                    }
+
+                    // clear msgs because guaranteed to get a fresh state because this runs at the same time as a "server tick"
+                    bot.state.msgs.Clear();
+                }
+            }
 
             // Use while loop and remove 1 at a time so that its more thread safe.
             // If you clear whole list, maybe a message was added right before you cleared.
@@ -152,7 +199,10 @@ public class Server : MonoBehaviour
         
     }
     
-    
+    public static void removeUserManager(string uid)
+    {
+        uidToUserM.Remove(uid);
+    }
 
     void transferNewMessage(GotMessage gm)
     {
@@ -178,12 +228,17 @@ public class Server : MonoBehaviour
 
     public static void sendToSpecificUser(string uid, Message m)
     {
-        string connID = uidToUserM[uid].currentConnID;
-        //byte[] serializedMsg = BinarySerializer.Serialize(m);
-        uidToMessageQueue.AddOrCreate<string, List<Message>, Message> (connID, m);
-        //wssv.WebSocketServices["/"].Sessions.SendTo(serializedMsg, connID);
-
-        // TODO: if uid is server (bot), then send to them directly
+        if (uid.Contains(BotState.BOTUIDPREFIX))
+        {
+            // TODO: if uid is server (bot), then send to them directly
+            uidToBot[uid].state.msgs.Add(m);
+        }
+        else
+        {
+            string connID = uidToUserM[uid].currentConnID;
+            uidToMessageQueue.AddOrCreate<string, List<Message>, Message>(connID, m);
+        }
+        
     }
 
     public static void sendToAll(Message m)
@@ -193,6 +248,10 @@ public class Server : MonoBehaviour
         broadcastMessageQueue.Add(m);
 
         // TODO: Send msg directly to all things with UID that has server in it
+        foreach (var bot in uidToBot.Values)
+        {
+            bot.state.msgs.Add(m);
+        }
     }
 
     public static UserManager getUserManager(string uid)
@@ -206,17 +265,19 @@ public class Server : MonoBehaviour
         }
     }
 
+    public Vector3 getSpawnLocation()
+    {
+        float x = Random.Range(-1 * Constants.spawnXRange, Constants.spawnXRange);
+        float z = Random.Range(-1 * Constants.spawnZRange, Constants.spawnZRange);
+        return new Vector3(x, 0, z);
+    }
+
     public void addUserManager(string uid)
     {
         UserManager newum = gameObject.AddComponent<UserManager>();
         uidToUserM.Add(uid, newum);
-        newum.startup(uid, uid, Constants.playerCharacterPrefab, new Vector3(0, 0, 0));
-    }
-
-    public void removeUserManager(string uid)
-    {
-        // Remove from both uid dicts
-        // Delete component
+        
+        newum.startup(uid, uid, Constants.playerCharacterPrefab, getSpawnLocation());
     }
 
     public void startServer()

@@ -23,6 +23,7 @@ public class UserManager : MonoBehaviour
     private bool startUp;
     InputBuffer inputBuffer = new InputBuffer();
     public string currentConnID;
+    bool closed = false;
 
     // Start is called before the first frame update
     void Start()
@@ -109,7 +110,8 @@ public class UserManager : MonoBehaviour
     // Use LateUpdate so Server has a chance to process all the message that came in this frame
     public void customUpdate()
     {
-        if (startUp)
+        processCloseMessage();
+        if (startUp && !closed)
         {
             processOpenMessage();
             processUserInputs();
@@ -117,6 +119,7 @@ public class UserManager : MonoBehaviour
             // Send info about self to Server to broadcast
 
             // Delete if dced for awhile
+            
             if (System.DateTime.Now.Subtract(usernet.msgMan.LastMessageTime).TotalSeconds > 60)
             {
                 deleteSelf();
@@ -131,9 +134,17 @@ public class UserManager : MonoBehaviour
     void deleteSelf(/*Server server*/)
     {
         // remove from server List of UserManagers
+        Server.removeUserManager(usernet.uid);
         // Destroy any related objects like playerCharacter
-        // destory self (component)
+        Destroy(playerCharacter);
+
         // send DestroyObject message to all
+        Server.sendToAll(new DeleteMessage(usernet.uid));
+
+        closed = true;
+
+        // destory self (component). Because this component lives in Server by itself
+        Destroy(this);
     }
 }
 

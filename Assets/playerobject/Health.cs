@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    public float startHP;
+    float startHP;
     float health;
     public HPBar hpbar;
     public float damageTakenMultiplier = 1;
@@ -16,6 +16,7 @@ public class Health : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        startHP = Constants.startHP;
         health = startHP;
     }
 

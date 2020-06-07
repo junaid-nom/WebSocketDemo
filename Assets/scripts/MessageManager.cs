@@ -141,6 +141,21 @@ public class ListMessage : Message
 }
 
 
+[Serializable]
+public class DeleteMessage : Message
+{
+    public string uid;
+    public DeleteMessage()
+    {
+        msgType = 7;
+    }
+    public DeleteMessage(String uid)
+    {
+        msgType = 7;
+        this.uid = uid;
+    }
+}
+
 // meant to hold msgs that will be READ not sent
 public class MessageManager
 {
