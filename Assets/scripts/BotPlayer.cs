@@ -53,6 +53,15 @@ public class Bot
         state = new BotState(state.botNumber);
         aiList = null;
     }
+
+    public override string ToString()
+    {
+        string ret = "";
+        ret += "uid:" + state.uid + "\n";
+        ret += "ai:" + ((aiList != null) ? Bots.printAIPriorityList(aiList, state) : "null") + "\n";
+        ret += "state: " + state.ToString() +"\n";
+        return ret;
+    }
 }
 
 // Bot state that an AI may use to store stuff like what was my previous HP, oh my current is less, must mean I got his this frame
@@ -75,6 +84,15 @@ public class AIMemory
         this.targetUID = targetUID;
         this.chasingTarget = chasingTarget;
     }
+
+    public override string ToString()
+    {
+        string ret = "";
+        ret += " lasthp: " + lastRecordedHP;
+        ret += " target: " + targetUID;
+        ret += " chasingTarget: " + chasingTarget;
+        return ret;
+    }
     // ...
 }
 
@@ -86,7 +104,7 @@ public class BotState
     // Somethinbg for my history of anims
     // something for 
     public const string BOTUIDPREFIX = "SERVERBOT:";
-    public List<CharacterState> charState = new List<CharacterState>(); // make sure new stuff is added at 0
+    public List<CharacterState> charState = new List<CharacterState>(); // TODO :make sure new stuff is added at 0
     public AIMemory extraState = new AIMemory(); // is null when first ran
 
     public BotState(int botNumber)
@@ -96,7 +114,15 @@ public class BotState
         charState.Add(new CharacterState(new CopyMovement(null, new Vector3(0,0,0), new Quaternion(), Constants.canMoveState, 0, false, 0))); // add one so dont have to do length > 0 all the time
     }
 
-    
+    public override string ToString()
+    {
+        string ret = "";
+        ret += " uid:" + uid;
+        ret += " msgs: " + msgs.Count;
+        ret += " charstates: " + msgs.Count;
+        ret += " extra state: " + extraState.ToString();
+        return ret;
+    }
 }
 public class CharacterState
 {
@@ -110,6 +136,62 @@ public class CharacterState
 
 public static class Bots
 {
+    public static string printAIPriorityList(AIPriorityList ai, BotState bot)
+    {
+        string ret = "ai:";
+        // If its the bots first frame alive, just have it stand still.
+        if (bot.msgs.Count <= 0)
+        {
+            return "no msgs ret nothing ";
+        }
+
+        //: return null if BotBehavior is null, Otherwise get BotBehavior by going through ai
+        BehaviorList blist = null;
+        if (ai != null)
+        {
+            foreach (var condBList in ai)
+            {
+                ret += "conditional Blist :\n";
+                foreach (var conditional in condBList.Item1)
+                {
+                    ret += "c:" + conditional.Key.Method.Name;
+                    ret += " " + (conditional.Key(bot) == conditional.Value);
+                }
+                if (checkConditionals(condBList.Item1, bot) && blist == null)
+                {
+                    blist = condBList.Item2;
+                    ret += "\n PICKED THIS \n";
+                }
+            }
+        }
+
+        BotBehavior b = null;
+       
+        if (blist != null)
+        {
+            foreach (var condBehav in blist)
+            {
+                ret += "conditional behave :\n";
+                foreach (var conditional in condBehav.Item1)
+                {
+                    ret += "c:" + conditional.Key.Method.Name;
+                    ret += " " + (conditional.Key(bot) == conditional.Value);
+                }
+                if (checkConditionals(condBehav.Item1, bot))
+                {
+                    b = condBehav.Item2;
+                    ret += "\n PICKED THIS \n";
+                }
+            }
+        }
+
+        //if (b != null)
+        //{
+        //    return b(bot);
+        //}
+        return ret;
+    }
+
     public static bool botAlive(BotState b, int activeConnections, int maxBots)
     {
         // If get bot number-> botnumber active connections, return true if not many connections and bot number low.
@@ -141,12 +223,15 @@ public static class Bots
 
         //: return null if BotBehavior is null, Otherwise get BotBehavior by going through ai
         BehaviorList blist = null;
-        foreach (var condBList in ai)
+        if (ai != null)
         {
-            if (checkConditionals(condBList.Item1, bot))
+            foreach (var condBList in ai)
             {
-                blist = condBList.Item2;
-                break;
+                if (checkConditionals(condBList.Item1, bot))
+                {
+                    blist = condBList.Item2;
+                    break;
+                }
             }
         }
 

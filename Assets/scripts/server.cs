@@ -118,27 +118,20 @@ public class Server : MonoBehaviour
 
     static Dictionary<string, Bot> uidToBot = new Dictionary<string, Bot>();
 
+    public static InspectorDebugger inspectorDebugger;
+
+    private void Awake()
+    {
+        inspectorDebugger = gameObject.GetComponent<InspectorDebugger>();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+         
         if (autoStartServer)
         {
             startServer();
-
-            //initialize Bots
-            {
-                Bot b1 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(uidToBot.Keys.Count), null);
-                Bot b2 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(uidToBot.Keys.Count), null);
-                Bot b3 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(uidToBot.Keys.Count), null);
-                Bot b4 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(uidToBot.Keys.Count), null);
-                Bot b5 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(uidToBot.Keys.Count), null);
-
-                uidToBot.Add(b1.state.uid, b1);
-                uidToBot.Add(b2.state.uid, b2);
-                uidToBot.Add(b3.state.uid, b3);
-                uidToBot.Add(b4.state.uid, b4);
-                uidToBot.Add(b5.state.uid, b5);
-            }
         }
     }
     
@@ -152,7 +145,7 @@ public class Server : MonoBehaviour
             // Add the msgs to StoreMessages.newMsgs
             foreach (Bot bot in uidToBot.Values)
             {
-                if (!Bots.botAlive(bot.state, 1, Constants.maxBots))
+                if (!Bots.botAlive(bot.state, wssv.WebSocketServices["/"].Sessions.Count, Constants.maxBots))
                 {
                     if (uidToUserM.ContainsKey(bot.state.uid))
                     {
@@ -163,6 +156,9 @@ public class Server : MonoBehaviour
                     System.Tuple<AIPriorityList, AIMemory> result = bot.ai(bot.aiList, bot.state);
                     bot.state.extraState = result.Item2;
                     UserInput uinp = Bots.getBotAction(result.Item1, bot.state);
+                    bot.aiList = result.Item1;
+                    //NetDebug.printBoth("Got: uinp " + ((uinp !=null) ? uinp.ToString() : "null") + " for: " + bot.state.uid);
+                    inspectorDebugger.addPair(new StringPair(bot.state.uid, bot.ToString()));
                     if (uinp != null)
                     {
                         StoreMessages.newMsgs.Add(new GotMessage(bot.state.uid, uinp));
@@ -182,7 +178,10 @@ public class Server : MonoBehaviour
             }
 
             // Call update on all UserManagers.
-            foreach (var um in uidToUserM.Values)
+            UserManager[] copyUM = new UserManager[uidToUserM.Values.Count];
+            uidToUserM.Values.CopyTo(copyUM, 0);
+            // Since could call deleteSelf, make a copy of the list to iterate through so don't modify list as you loop
+            foreach (var um in copyUM)
             {
                 um.customUpdate();
             }
@@ -291,6 +290,21 @@ public class Server : MonoBehaviour
         NetDebug.printBoth("starting wssv ");
         wssv.Start();
         NetDebug.printBoth("started wssv " + wssv.IsListening);
+
+        //initialize Bots
+        {
+            Bot b1 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(0), null);
+            Bot b2 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(1), null);
+            Bot b3 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(2), null);
+            Bot b4 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(3), null);
+            Bot b5 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(4), null);
+
+            uidToBot.Add(b1.state.uid, b1);
+            uidToBot.Add(b2.state.uid, b2);
+            uidToBot.Add(b3.state.uid, b3);
+            uidToBot.Add(b4.state.uid, b4);
+            uidToBot.Add(b5.state.uid, b5);
+        }
     }
 
     void closeStuff()

@@ -153,9 +153,10 @@ public class InputToMovement : MonoBehaviour
             cp.anim_state = stateNames[3];
             cp.normalizedTime = 0;
         }
-        else if (animator.GetCurrentAnimatorStateInfo(0).IsName(Constants.getHitState))
+        else if (!canChange)
         {
-            cp.anim_state = Constants.getHitState;
+            // this is a little strange cause the animation playing on client will get constantly overriden to a delayed version from the server. So need to ignore normalized time if local normalizedTime is > msg time
+            cp.anim_state = animator.GetCurrentAnimatorClipInfo(0)[0].clip.name;
             cp.normalizedTime = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
         }
         else if (canChange && index >= 0)
@@ -165,7 +166,7 @@ public class InputToMovement : MonoBehaviour
         }
         else
         {
-            // TODO: This is kinda weird cause if the user misses the message where we told them the anim state started, they won't see any animation. But I guess because its websockets its fine, but if it was UDP it wouldn't be
+           
             cp.anim_state = null;
             cp.normalizedTime = -1;
         }

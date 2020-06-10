@@ -26,7 +26,7 @@ public static class BotHelpers
         CopyMovement enemyClosest = null;
         enemies.ForEach(e =>
         {
-            var distance = Vector3.Distance(enemyClosest.localPosition, loc);
+            var distance = Vector3.Distance(e.localPosition, loc);
             if (enemyClosest == null || distance < minDistance)
             {
                 minDistance = distance;
@@ -105,7 +105,7 @@ public static class Conditions
     public static bool closestEnemyMissedInAttackRange(BotState bot)
     {
         CopyMovement closest = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.charState[0].myState.localPosition);
-        if (Constants.attackAnimationInfo.nameToAnimation.ContainsKey(closest.anim_state))
+        if (closest !=null && closest.anim_state!=null && Constants.attackAnimationInfo.nameToAnimation.ContainsKey(closest.anim_state))
         {
             AnimationClip attack = Constants.attackAnimationInfo.nameToAnimation[closest.anim_state];
             float leftOverTime = attack.length - closest.normalizedTime;

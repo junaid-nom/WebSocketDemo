@@ -65,8 +65,11 @@ public class copyFromStruct : MonoBehaviour
         }
         if (mv.anim_state != null)
         {
-            animator.StopPlayback();
-            animator.Play(mv.anim_state, 0, mv.normalizedTime);
+            if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < mv.normalizedTime || !animator.GetCurrentAnimatorStateInfo(0).IsName(mv.anim_state))
+            {
+                animator.StopPlayback();
+                animator.Play(mv.anim_state, 0, mv.normalizedTime);
+            }
         }
     }
 
