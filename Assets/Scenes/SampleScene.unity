@@ -573,6 +573,7 @@ GameObject:
   - component: {fileID: 786295376}
   - component: {fileID: 786295377}
   - component: {fileID: 786295378}
+  - component: {fileID: 786295379}
   m_Layer: 0
   m_Name: Server
   m_TagString: Untagged
@@ -636,6 +637,19 @@ MonoBehaviour:
   - {fileID: 7400000, guid: 19cda3b9335aed345bae6189227ecc5d, type: 2}
   - {fileID: 7400000, guid: fd2256961cd603644b77c46cc2105e20, type: 2}
   - {fileID: 7400000, guid: 43d44e99f89122f4f9ba80b92532381f, type: 2}
+--- !u!114 &786295379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786295374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a5b19fbcaffb0e449c2ea5b0eaac3f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pairs: []
 --- !u!224 &799965354 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 224084813030101084, guid: baff84928309d134ab74ca5cbe0cf9ee,
@@ -1604,7 +1618,7 @@ PrefabInstance:
     - target: {fileID: 4526716443191717521, guid: 02881f5f01df698429b1eda87cd772ec,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4526716444489829469, guid: 02881f5f01df698429b1eda87cd772ec,
         type: 3}
