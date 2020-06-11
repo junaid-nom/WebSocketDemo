@@ -150,12 +150,17 @@ public class Server : MonoBehaviour
                     if (uidToUserM.ContainsKey(bot.state.uid))
                     {
                         StoreMessages.newMsgs.Add(new GotMessage(bot.state.uid, new CloseMessage()));
+                        bot.reset();
                     }
                 } else
                 {
                     System.Tuple<AIPriorityList, AIMemory> result = bot.ai(bot.aiList, bot.state);
                     bot.state.extraState = result.Item2;
                     UserInput uinp = Bots.getBotAction(result.Item1, bot.state);
+                    if (result.Item1 == null)
+                    {
+                        Debug.Log("null retai");
+                    }
                     bot.aiList = result.Item1;
                     //NetDebug.printBoth("Got: uinp " + ((uinp !=null) ? uinp.ToString() : "null") + " for: " + bot.state.uid);
                     inspectorDebugger.addPair(new StringPair(bot.state.uid, bot.ToString()));
@@ -231,13 +236,13 @@ public class Server : MonoBehaviour
         {
             // TODO: if uid is server (bot), then send to them directly
             uidToBot[uid].state.msgs.Add(m);
+            tryAddToBotCharState(uid, m);
         }
         else
         {
             string connID = uidToUserM[uid].currentConnID;
             uidToMessageQueue.AddOrCreate<string, List<Message>, Message>(connID, m);
         }
-        
     }
 
     public static void sendToAll(Message m)
@@ -250,6 +255,22 @@ public class Server : MonoBehaviour
         foreach (var bot in uidToBot.Values)
         {
             bot.state.msgs.Add(m);
+            tryAddToBotCharState(bot.state.uid, m);
+        }
+    }
+
+    public static void tryAddToBotCharState(string uid, Message m)
+    {
+        if (uidToBot.ContainsKey(uid))
+        {
+            if (m.msgType == 1)
+            {
+                CopyMovement cp = (CopyMovement)m;
+                if (cp.objectInfo.uid == uid)
+                {
+                    uidToBot[uid].state.charState.Insert(0, new CharacterState(cp));
+                }
+            }
         }
     }
 

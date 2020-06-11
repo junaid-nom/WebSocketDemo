@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    float startHP;
-    float health;
+    float startHP = Constants.startHP;
+    float health = Constants.startHP;
     public HPBar hpbar;
     public float damageTakenMultiplier = 1;
 
@@ -16,8 +16,8 @@ public class Health : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        startHP = Constants.startHP;
-        health = startHP;
+        //startHP = Constants.startHP;
+        //health = startHP;
     }
 
     // Update is called once per frame
@@ -31,6 +31,11 @@ public class Health : MonoBehaviour
     {
         health = hp;
         hpbar.setHPScale(health / startHP);
+    }
+
+    public float getHealth()
+    {
+        return health;
     }
 
     public void changeHealth(float change)

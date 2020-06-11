@@ -15,6 +15,7 @@ public class copyFromStruct : MonoBehaviour
 {
     public Animator animator;
     public Collider playerHitBox;
+    public Health health;
     // Start is called before the first frame update
     void Start()
     {
@@ -47,7 +48,7 @@ public class copyFromStruct : MonoBehaviour
             {
                 if (hit.collider != null && hit.collider.gameObject != playerHitBox.gameObject)
                 {
-                    Debug.Log(playerHitBox.gameObject.GetInstanceID() + " " + this.gameObject.GetInstanceID() + " Got hit:" + hit.collider.gameObject.name + " " + hit.collider.gameObject.GetInstanceID());
+                    //Debug.Log(playerHitBox.gameObject.GetInstanceID() + " " + this.gameObject.GetInstanceID() + " Got hit:" + hit.collider.gameObject.name + " " + hit.collider.gameObject.GetInstanceID());
                 }
                 else
                 {
@@ -71,6 +72,7 @@ public class copyFromStruct : MonoBehaviour
                 animator.Play(mv.anim_state, 0, mv.normalizedTime);
             }
         }
+        health.setHealth(mv.health);
     }
 
     public static IEnumerator SendAfterTime(float time, CopyMovement cp, copyFromStruct obj)

@@ -20,6 +20,7 @@ public class UserManager : MonoBehaviour
     GameObject playerPrefab;
     copyFromStruct playerCopyController;
     Animator playerAnimator;
+    Health playerHealth;
     private bool startUp;
     InputBuffer inputBuffer = new InputBuffer();
     public string currentConnID;
@@ -62,6 +63,7 @@ public class UserManager : MonoBehaviour
         playerCopyController = playerCharacter.GetComponent<copyFromStruct>();
         playerAnimator = playerCharacter.GetComponent<Animator>();
         PlayerObject po = playerCharacter.GetComponent<PlayerObject>();
+        playerHealth = playerCharacter.GetComponent<Health>();
         po.uid = usernet.uid;
     }
 
@@ -78,12 +80,11 @@ public class UserManager : MonoBehaviour
             
         }
         UserInput finalui = inputBuffer.getInput();
-        CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID);
+        CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth());
         playerCopyController.setMovement(cp);
         if (cp.anim_state != null && cp.anim_state!="" && cp.anim_state != "canMoveState" && cp.normalizedTime == 0)
         {
             //reset inp buffer
-            Debug.Log("Clearning inp buffer");
             inputBuffer.clearBuffer();
         }
         Server.sendToAll(cp);

@@ -105,7 +105,7 @@ public class BotState
     // something for 
     public const string BOTUIDPREFIX = "SERVERBOT:";
     public List<CharacterState> charState = new List<CharacterState>(); // TODO :make sure new stuff is added at 0
-    public AIMemory extraState = new AIMemory(); // is null when first ran
+    public AIMemory extraState = null; // is null when first ran
 
     public BotState(int botNumber)
     {
@@ -250,7 +250,8 @@ public static class Bots
 
         if (b != null)
         {
-            return b(bot);
+            var ret = b(bot);
+            return ret;
         }
         return null; //TODO NOTE: If a bot returns null long enough it will die from the Server thinking the "player" hasnt sent a message in a long time (dced). // maybe this is fine though, respawn bot in a diff random loc?
     }
@@ -318,8 +319,8 @@ public static class Bots
             retAI.Add(new ConditionalBehaviorList(lowHealthConds, lowHealth));
             // so basically dont need to use BehaviorAttributes really...
             // Just set chasing to when enemy misses, or enemy has low HP.
-
-            return Tuple.Create(retAI, new AIMemory());
+            var ret = Tuple.Create(retAI, new AIMemory());
+            return ret;
         }
         else
         {

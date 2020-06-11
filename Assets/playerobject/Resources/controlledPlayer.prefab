@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 504579290}
   - component: {fileID: 118406936332530995}
   - component: {fileID: 3733008155849178468}
+  - component: {fileID: 4711426556636034974}
   m_Layer: 0
   m_Name: controlledPlayer
   m_TagString: Untagged
@@ -153,6 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 4526716443191717522}
   playerHitBox: {fileID: 4526716444658455260}
+  health: {fileID: 118406936332530995}
 --- !u!54 &701105801423683021
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -193,7 +195,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c29f67c829d53642b5c4fd6e3c7a181, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startHP: 100
   hpbar: {fileID: 7735163662462991470}
   damageTakenMultiplier: 1
   invulChange: {fileID: 518486778}
@@ -212,6 +213,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uid: 
+--- !u!114 &4711426556636034974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4526716443191717521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d1b3b8c5a697054ea4e26ae3932c6cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4526716443743390935
 GameObject:
   m_ObjectHideFlags: 0

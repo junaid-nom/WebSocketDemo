@@ -121,6 +121,11 @@ public static class Conditions
 
     public static bool selfAttacking(BotState bot)
     {
+        if (bot.charState[0].myState.anim_state == null)
+        {
+            return false;
+        }
+        
         return Constants.attackAnimationInfo.nameToAnimation.ContainsKey(bot.charState[0].myState.anim_state);
     }
 

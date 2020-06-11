@@ -4,13 +4,12 @@ using UnityEngine;
 
 public class HPBar : MonoBehaviour
 {
-    GameObject fill;
+    GameObject fill = null;
     float initialScale;
     // Start is called before the first frame update
     void Start()
     {
-        fill = this.gameObject;
-        initialScale = fill.transform.localScale.x;
+        bootup();
     }
 
     // Update is called once per frame
@@ -19,8 +18,18 @@ public class HPBar : MonoBehaviour
         
     }
 
+    void bootup()
+    {
+        if (fill == null)
+        {
+            fill = this.gameObject;
+            initialScale = fill.transform.localScale.x;
+        }
+    }
+
     public void setHPScale(float fraction)
     {
+        bootup();
         float newx = initialScale * fraction;
         fill.transform.localScale = new Vector3(newx, fill.transform.localScale.y, fill.transform.localScale.z);
     }
