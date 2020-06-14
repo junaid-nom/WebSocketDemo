@@ -21,7 +21,7 @@ public class WeaponInfo
 
 public class Constants : MonoBehaviour
 {
-    public const float charMoveSpeed = 20;
+    public const float charMoveSpeed = 10;
     public const float startHP = 100;
 
     public const int inputLifetimeMS = 400;

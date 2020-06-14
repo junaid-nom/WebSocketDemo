@@ -41,6 +41,10 @@ public class NetworkObjectClient
         this.gameObject = gameObject;
         this.objectInfo = objectInfo;
         this.timeSinceHeartbeat = timeSinceHeartbeat;
+        if (Server.isOn)
+        {
+            gameObject.SetActive(false);
+        }
     }
 }
 
@@ -126,7 +130,8 @@ public class Client : MonoBehaviour
         string k = cp.objectInfo.objectID;
         if (cp.objectInfo.uid == myUID)
         {
-            cp.ignoreRotation = true;
+            if (cp.anim_state == Constants.canMoveState)
+                cp.ignoreRotation = true;
             myobjsByType.AddOrCreate<string, List<string>, string>(Enum.GetName(typeof(NetworkObjectType), NetworkObjectType.playerCharacter), k);
         }
         if (objIDToObject.ContainsKey(k))
@@ -140,10 +145,7 @@ public class Client : MonoBehaviour
             GameObject ng = Instantiate(Constants.playerCharacterPrefab);
             ng.GetComponent<PlayerObject>().uid = cp.objectInfo.uid;
             ng.name = "CLIENT" + ng.name;
-            if (Server.isOn)
-            {
-                ng.SetActive(false);
-            }
+            
             Debug.Log("Adding obj k:" + k);
             // add dictionary entry
             objIDToObject.Add(k, new NetworkObjectClient(ng, cp.objectInfo, System.DateTime.Now));

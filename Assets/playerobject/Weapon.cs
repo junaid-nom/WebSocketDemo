@@ -40,7 +40,7 @@ public class Weapon : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Hit:" + other.gameObject.name);
+        Debug.Log("" + myp.gameObject.name + " Hit:" + other.gameObject.name);
         Health hOther = Constants.getComponentInParentOrChildren<Health>(other.gameObject);
         PlayerObject p = Constants.getComponentInParentOrChildren<PlayerObject>(other.gameObject);
         if ((p== null || p.uid != myp.uid) && hOther != null && !hitAlready.Contains(hOther))

@@ -12,7 +12,7 @@ public static class BotHelpers
 
     public static List<CopyMovement> getEnemies(BotState bot)
     {
-        List<Message> cpMsgs = bot.msgs.FindAll(m => m.msgType == 1);
+        List<Message> cpMsgs = bot.msgs.FindAll(m => m.GetType() == typeof(CopyMovement)); // m.msgType == 1
         List<CopyMovement> copyMovements = new List<CopyMovement>();
         cpMsgs.ForEach(cp => copyMovements.Add((CopyMovement)cp)); // cast
         // Get direction away from them
@@ -51,7 +51,7 @@ public static class BotHelpers
         return runTo;
     }
 
-    public static Vector2 positionToInputDirections(Vector2 runTo)
+    public static Vector2 positionToInputDirectionsFrom0_0(Vector2 runTo)
     {
         Vector2 closestDir = new Vector2(0, 0);
         for (int x = -1; x <= 1; x++)
@@ -67,7 +67,24 @@ public static class BotHelpers
         }
         return closestDir;
     }
-    
+
+    public static Vector2 positionToInputDirections(Vector2 start, Vector2 runTo)
+    {
+        Vector2 closestDir = new Vector2(0, 0);
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                Vector2 dir = new Vector2(x, y);
+                if (Vector2.Distance(dir + start, runTo) < Vector2.Distance(closestDir + start, runTo))
+                {
+                    closestDir = dir;
+                }
+            }
+        }
+        return closestDir;
+    }
+
     public static CopyMovement getSpecificEnemy(BotState bot, string uid)
     {
         //TODO: this could get a "bullet" or spawned thingy of a player that isnt the player itself in the future unless changed.
@@ -164,7 +181,7 @@ public static class Behaviors
         Vector2 runTo = BotHelpers.getSafestDirection(bot.charState[0].myState.localPosition, enemies);
 
         //Find closest direction of the 8 a player can move to runTo
-        Vector2 closestDir = BotHelpers.positionToInputDirections(runTo);
+        Vector2 closestDir = BotHelpers.positionToInputDirectionsFrom0_0(runTo);
 
         ret.x = closestDir.x;
         ret.y = closestDir.y;
@@ -187,7 +204,7 @@ public static class Behaviors
         Vector2 runTo = BotHelpers.getSafestDirection(bot.charState[0].myState.localPosition, enemies);
 
         //Find closest direction of the 8 a player can move to runTo
-        Vector2 closestDir = BotHelpers.positionToInputDirections(runTo);
+        Vector2 closestDir = BotHelpers.positionToInputDirectionsFrom0_0(runTo);
 
         ret.x = closestDir.x;
         ret.y = closestDir.y;
@@ -217,9 +234,10 @@ public static class Behaviors
         CopyMovement target = BotHelpers.getSpecificEnemy(bot, bot.extraState.targetUID);
         if (target != null)
         {
-            Vector2 dir = BotHelpers.positionToInputDirections(new Vector2(target.localPosition.x, target.localPosition.z));
+            Vector2 dir = BotHelpers.positionToInputDirections(new Vector2(bot.charState[0].myState.localPosition.x, bot.charState[0].myState.localPosition.z), new Vector2(target.localPosition.x, target.localPosition.z));
             ret.x = dir.x;
             ret.y = dir.y;
+            Server.inspectorDebugger.addPair(new StringPair(bot.uid + "chase", "x:" + ret.x + "y" + ret.y));
             ret.buttonsDown = new List<bool>() { false, false, false, false };
         }
         else
@@ -242,12 +260,14 @@ public static class Behaviors
             CopyMovement target = BotHelpers.getSpecificEnemy(bot, bot.extraState.targetUID);
             if (target != null)
             {
-                Vector2 dir = BotHelpers.positionToInputDirections(new Vector2(target.localPosition.x, target.localPosition.z));
+                Vector2 dir = BotHelpers.positionToInputDirections(new Vector2(bot.charState[0].myState.localPosition.x, bot.charState[0].myState.localPosition.z), new Vector2(target.localPosition.x, target.localPosition.z));
                 ret.x = dir.x;
                 ret.y = dir.y;
+                Server.inspectorDebugger.addPair(new StringPair(bot.uid + "attack", "x:" + ret.x + "y" + ret.y));
 
                 ret.buttonsDown = new List<bool>() { false, false, false, false };
                 ret.buttonsDown[buttonIndex] = true;
+                ret.target = target.localPosition;
             }
             else
             {

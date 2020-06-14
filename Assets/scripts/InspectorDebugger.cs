@@ -15,12 +15,12 @@ public class StringPair
         this.s2 = s2;
     }
 
-    public override bool Equals(object obj)
-    {
-        var pair = obj as StringPair;
-        return pair != null &&
-               s1 == pair.s1;
-    }
+    //public override bool Equals(object obj)
+    //{
+    //    var pair = obj as StringPair;
+    //    return pair != null &&
+    //           s1 == pair.s1;
+    //}
 }
 
 public class InspectorDebugger : MonoBehaviour

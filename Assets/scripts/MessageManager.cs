@@ -11,7 +11,7 @@ public enum NetworkObjectType
 [Serializable]
 public class Message
 {
-    public byte msgType = 0;
+    //public byte msgType = 0;
 }
 
 [Serializable]
@@ -42,12 +42,12 @@ public class CopyMovement : Message
 
     public CopyMovement()
     {
-        msgType = 1;
+        //msgType = 1;
     }
 
     public CopyMovement(NetworkObjectInfo objectInfo, SerializableVector3 localPosition, SerializableQuaternion localRotation, string anim_state, float normalizedTime, bool ignoreRotation, float health)
     {
-        msgType = 1;
+        //msgType = 1;
         this.objectInfo = objectInfo;
         this.localPosition = localPosition;
         this.localRotation = localRotation;
@@ -71,10 +71,11 @@ public class UserInput : Message
     public float x;
     public float y;
     public List<bool> buttonsDown;
+    public SerializableVector3 target;
 
     public UserInput ()
     {
-        msgType = 2;
+        //msgType = 2;
     }
 
     public override string ToString()
@@ -87,6 +88,7 @@ public class UserInput : Message
                 ret += " b" + i + ":" + buttonsDown[i];
             }
         }
+        ret += " target: " + target.x + "," + target.y;
         return ret;
     }
 }
@@ -97,11 +99,11 @@ public class StringMessage : Message
     public string str;
     public StringMessage()
     {
-        msgType = 3;
+        //msgType = 3;
     }
     public StringMessage(string toSend)
     {
-        msgType = 3;
+        //msgType = 3;
         str = toSend;
     }
 }
@@ -112,7 +114,7 @@ public class CloseMessage : Message
 {
     public CloseMessage()
     {
-        msgType = 4;
+       // msgType = 4;
     }
 }
 [Serializable]
@@ -120,7 +122,7 @@ public class OpenMessage : Message
 {
     public OpenMessage()
     {
-        msgType = 5;
+        //msgType = 5;
     }
 }
 
@@ -131,11 +133,11 @@ public class ListMessage : Message
     public List<Message> messageArray;
     public ListMessage()
     {
-        msgType = 6;
+        //msgType = 6;
     }
     public ListMessage(List<Message> messageArray)
     {
-        msgType = 6;
+        //msgType = 6;
         this.messageArray = messageArray;
     }
 }
@@ -147,11 +149,11 @@ public class DeleteMessage : Message
     public string uid;
     public DeleteMessage()
     {
-        msgType = 7;
+        //msgType = 7;
     }
     public DeleteMessage(String uid)
     {
-        msgType = 7;
+        //msgType = 7;
         this.uid = uid;
     }
 }
@@ -227,15 +229,15 @@ public class MessageManager
 
     public static void debugMsg(Message deser)
     {
-        if (deser.msgType == 3)
+        if (deser.GetType() == typeof(StringMessage) ) //deser.msgType == 3
         {
             NetDebug.printBoth("Got stringmsg: " + ((StringMessage)deser).str);
         }
-        else if (deser.msgType == 2)
+        else if (deser.GetType() == typeof(UserInput)) // deser.msgType == 2
         {
             NetDebug.printBoth("Got UserInput: " + ((UserInput)deser).ToString());
         }
-        else if (deser.msgType == 1)
+        else if (deser.GetType() == typeof(CopyMovement)) // deser.msgType == 1
         {
               NetDebug.printBoth("Got CopyMovement: " + ((CopyMovement)deser).ToString());
         }

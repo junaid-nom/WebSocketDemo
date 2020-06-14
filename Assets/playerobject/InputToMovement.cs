@@ -57,10 +57,12 @@ public class InputBuffer
             if (pressed.Count > 0)
             {
                 combined.buttonsDown = pressed[pressed.Count - 1].inp.buttonsDown;
+                combined.target = pressed[pressed.Count - 1].inp.target;
             }
             else
             {
                 combined.buttonsDown = lastInp.buttonsDown;// this is just an empty list
+                combined.target = lastInp.target;
             }
 
             inp = combined;
@@ -77,29 +79,7 @@ public class InputBuffer
 
 public class InputToMovement : MonoBehaviour
 {
-    //public GameObject objectToControl;
-    //public GameObject instantFeedbackObject;
-    //public List<string> stateNames;
-    //public string canMoveState;
-    //public float speed;
-
-    //Animator animator;
-    //Animator instantFeedbackAnimator;
-    //copyFromStruct copying;
-
-    //float sendPingSecs = .1f;
-
-    //InputBuffer inputBuffer = new InputBuffer();
-
-    // Start is called before the first frame update
-    //void Start()
-    //{
-    //    animator = objectToControl.GetComponent<Animator>();
-    //    copying = objectToControl.GetComponent<copyFromStruct>();
-    //    instantFeedbackAnimator = instantFeedbackObject.GetComponent<Animator>();
-    //}
-
-    public static UserInput getInput()
+    public static UserInput getClientInput()
     {
         UserInput newInp = new UserInput();
         newInp.x = Input.GetAxis("Horizontal");
@@ -110,6 +90,18 @@ public class InputToMovement : MonoBehaviour
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(2));
         newInp.buttonsDown.Add(Input.GetButton("dodge"));
 
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Plane plane = new Plane(Vector3.up, Vector3.zero);
+        float distance;
+        if (plane.Raycast(ray, out distance))
+        {
+            Vector3 target = ray.GetPoint(distance);
+            newInp.target = target;
+            //Vector3 direction = target - transform.position;
+            //float rotation = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+            //transform.rotation = Quaternion.Euler(0, rotation, 0);
+        }
+        
         return newInp;
     }
 
@@ -117,6 +109,14 @@ public class InputToMovement : MonoBehaviour
     {
         Vector3 direction = new Vector3(inp.x, 0, inp.y).normalized;
         return Quaternion.Euler(0, Quaternion.LookRotation((direction).normalized).eulerAngles.y, 0);
+    }
+
+    public static Quaternion getRotationToLookAt(Vector3 position, Vector3 lookAt)
+    {
+        position = new Vector3(position.x, 0, position.z);
+        lookAt = new Vector3(lookAt.x, 0, lookAt.z);
+        Vector3 directionTo = lookAt - position;
+        return Quaternion.Euler(0, Quaternion.LookRotation((directionTo).normalized).eulerAngles.y, 0);
     }
 
     public static CopyMovement inputToMovement(UserInput inp, Vector3 oldPositionLocal, Quaternion oldRotationLocal, float speed, Animator animator, string canChangeState, List<string> stateNames, string uid, float health)
@@ -132,7 +132,9 @@ public class InputToMovement : MonoBehaviour
                 canDodge = true;
             }
         }
-            
+        inp.x = Mathf.Clamp(inp.x, -1, 1);
+        inp.y = Mathf.Clamp(inp.y, -1, 1);
+
         if (canChange && (inp.x != 0 || inp.y != 0))
         {
             Vector3 direction = new Vector3(inp.x, 0, inp.y).normalized;
@@ -161,6 +163,11 @@ public class InputToMovement : MonoBehaviour
         }
         else if (canChange && index >= 0)
         {
+            // change direction to what is pointed at
+            var lookat = getRotationToLookAt(cp.localPosition, inp.target);
+            cp.localRotation = lookat;
+            if (index > 0)
+                Debug.Log("target: " + inp.target + " lookat: " + lookat.eulerAngles);
             cp.anim_state = stateNames[index];
             cp.normalizedTime = 0;
         }
@@ -198,7 +205,7 @@ public class InputToMovement : MonoBehaviour
         if (Client.ws != null 
             && Client.ws.GetState() == HybridWebSocket.WebSocketState.Open)
         {
-            UserInput nowInput = getInput();
+            UserInput nowInput = getClientInput();
             //Send msg to server
             Client.ws.Send(BinarySerializer.Serialize(nowInput));
 

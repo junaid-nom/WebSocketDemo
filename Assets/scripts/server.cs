@@ -263,7 +263,7 @@ public class Server : MonoBehaviour
     {
         if (uidToBot.ContainsKey(uid))
         {
-            if (m.msgType == 1)
+            if (m.GetType() == typeof(CopyMovement)) //m.msgType == 1 && 
             {
                 CopyMovement cp = (CopyMovement)m;
                 if (cp.objectInfo.uid == uid)
@@ -315,9 +315,9 @@ public class Server : MonoBehaviour
         //initialize Bots
         {
             Bot b1 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(0), null);
-            Bot b2 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(1), null);
-            Bot b3 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(2), null);
-            Bot b4 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(3), null);
+            Bot b2 = new Bot(Bots.AggroLowHealth, new BotState(1), null);
+            Bot b3 = new Bot(Bots.AggroLowHealth, new BotState(2), null);
+            Bot b4 = new Bot(Bots.AggroLowHealth, new BotState(3), null);
             Bot b5 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(4), null);
 
             uidToBot.Add(b1.state.uid, b1);

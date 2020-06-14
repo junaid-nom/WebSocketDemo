@@ -349,4 +349,117 @@ public static class Bots
         }
         
     }
+
+
+
+    // put init as extraState is null
+    public static Tuple<AIPriorityList, AIMemory> AggroLowHealth(AIPriorityList ai, BotState bot)
+    {
+        if (bot.extraState == null)
+        {
+            // initialize bot
+
+            AIPriorityList retAI = new AIPriorityList();
+            //:
+            // First BehaviorList is: if high hp > 50%
+            // 1. AttackTarget Behavior, if: CanAttackRange is true, and chasing memory
+            // 2. ChaseTarget Behavior, if: chasing memory
+            // 3. Dodge, if: enemy in attack range.
+            // 4. Do nothing
+            
+
+            BehaviorList highHealth = new BehaviorList();
+
+            Dictionary<Condition, bool> attackIfChasingConditions = new Dictionary<Condition, bool>();
+            attackIfChasingConditions.Add(Conditions.CanAttackRange, true);
+            attackIfChasingConditions.Add(Conditions.memoryIsChasing, true);
+            ConditionalBehavior attackIfChasing = new Tuple<Dictionary<Condition, bool>, BotBehavior>(attackIfChasingConditions, Behaviors.AttackTarget(0));
+
+            Dictionary<Condition, bool> runAtIfChasingConditions = new Dictionary<Condition, bool>();
+            runAtIfChasingConditions.Add(Conditions.memoryIsChasing, true);
+            ConditionalBehavior runAtIfChasing = new Tuple<Dictionary<Condition, bool>, BotBehavior>(runAtIfChasingConditions, Behaviors.chaseTarget);
+
+            Dictionary<Condition, bool> dodgeConditions = new Dictionary<Condition, bool>();
+            dodgeConditions.Add(Conditions.EnemiesCouldAttackRange, true);
+            ConditionalBehavior dodge = new ConditionalBehavior(dodgeConditions, Behaviors.dodgeAway);
+
+            Conditionals nothingCond = new Conditionals();
+            ConditionalBehavior nothing = new ConditionalBehavior(nothingCond, Behaviors.standStill);
+
+            highHealth.Add(attackIfChasing);
+            highHealth.Add(runAtIfChasing);
+            highHealth.Add(dodge);
+            highHealth.Add(nothing);
+
+            Conditionals highHealthCondition = new Conditionals();
+            //highHealthCondition.Add(Conditions.selfHealthGreaterThan(Constants.startHP / 2), true);
+
+            retAI.Add(new ConditionalBehaviorList(highHealthCondition, highHealth));
+
+            // Second BehaviorList is similar except, default behavior is to run away not do nothing.
+            // AI should use 2nd behavior list if lower hp than nearest enemy
+            //BehaviorList lowHealth = new BehaviorList();
+
+            //Conditionals runAwayCond = new Conditionals();
+            //ConditionalBehavior runAway = new ConditionalBehavior(runAwayCond, Behaviors.RunAway);
+
+            //lowHealth.Add(attackIfChasing);
+            //lowHealth.Add(runAtIfChasing);
+            //lowHealth.Add(dodge);
+            //lowHealth.Add(runAway);
+
+            //Conditionals lowHealthConds = new Conditionals();
+            //lowHealthConds.Add(Conditions.selfHealthGreaterThan(Constants.startHP / 2), false);
+
+            //retAI.Add(new ConditionalBehaviorList(lowHealthConds, lowHealth));
+            //// so basically dont need to use BehaviorAttributes really...
+            //// Just set chasing to when enemy misses, or enemy has low HP.
+
+            var ret = Tuple.Create(retAI, new AIMemory());
+            return ret;
+        }
+        else
+        {
+            AIMemory retMem = bot.extraState.Clone<AIMemory>();
+
+            if (!retMem.chasingTarget && !Conditions.selfAttacking(bot))
+            {
+                var enemies = BotHelpers.getEnemies(bot);
+                if (enemies.Count > 0)
+                {
+                    enemies.Sort((e1, e2) => {
+                        if (e1.health == e2.health) return 0;
+                        if (e1.health < e2.health) return -1;
+                        if (e1.health > e2.health) return 1;
+                        return 0;
+                    });
+
+                    Debug.Assert(enemies.Count <= 1 || enemies[0].health <= enemies[enemies.Count - 1].health);
+                    if (enemies.Count == 1)
+                    {
+                        retMem.targetUID = enemies[0].objectInfo.uid;
+                    }
+                    else if (enemies[0].health == enemies[enemies.Count - 1].health)
+                    {
+                        retMem.targetUID = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.charState[0].myState.localPosition).objectInfo.uid;
+                    }
+                    else
+                    {
+                        var lowEnemies = enemies.FindAll(e => e.health <= enemies[0].health);
+                        retMem.targetUID = BotHelpers.getClosest(lowEnemies, bot.charState[0].myState.localPosition).objectInfo.uid;
+                    }
+                    retMem.chasingTarget = true;
+                }
+            }
+
+            if (retMem.chasingTarget && Conditions.selfAttacking(bot))
+            {
+                // retMem.targetUID = null; // Not sure if good? Maybe need to keep target but not chase?
+                retMem.chasingTarget = false;
+            }
+
+            return Tuple.Create(ai, retMem);
+        }
+
+    }
 }

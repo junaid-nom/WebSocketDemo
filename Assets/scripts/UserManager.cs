@@ -64,6 +64,7 @@ public class UserManager : MonoBehaviour
         playerAnimator = playerCharacter.GetComponent<Animator>();
         PlayerObject po = playerCharacter.GetComponent<PlayerObject>();
         playerHealth = playerCharacter.GetComponent<Health>();
+        playerCharacter.name = "P-" + usernet.uid;
         po.uid = usernet.uid;
     }
 
