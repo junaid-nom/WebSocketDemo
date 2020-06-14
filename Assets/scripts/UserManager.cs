@@ -141,7 +141,7 @@ public class UserManager : MonoBehaviour
         Destroy(playerCharacter);
 
         // send DestroyObject message to all
-        Server.sendToAll(new DeleteMessage(usernet.uid));
+        Server.sendToAll(new DeleteMessage(usernet.uid, null));
 
         closed = true;
 

@@ -19,6 +19,9 @@ public class WeaponInfo
     }
 }
 
+public delegate T best<T>(T a, T b); 
+
+
 public class Constants : MonoBehaviour
 {
     public const float charMoveSpeed = 10;
@@ -28,12 +31,14 @@ public class Constants : MonoBehaviour
 
     public const string canMoveState = "defAnim";
     public const string getHitState = "getHit";
-    public static readonly string[] charUserControlledStateNames = { "anim1", "anim2", "anim3_flip", "dodge" }; // TODO Change to enum... and also use that enum to index CopyMovement ButtonsDown
-    public static readonly string[] dodgeFromStates = { getHitState, canMoveState };
+    public const string pickUpState = "pickup";
+    public static readonly string[] charUserControlledStateNames = { "anim1", "anim2", "anim3_flip", "dodge", pickUpState }; // TODO Change to enum... and also use that enum to index CopyMovement ButtonsDown
+    public static readonly string[] dodgeFromStates = { getHitState, canMoveState, pickUpState };
 
     public const float timeNeededToCounterAttack = .1f;
 
     public static GameObject playerCharacterPrefab;
+    public static Dictionary<System.Type, GameObject> prefabsFromType = new Dictionary<System.Type, GameObject>(); 
 
     public const int secondsBeforeDestroyNetworkObject = 10;
     public const float playerWidth = .5f;
@@ -43,7 +48,7 @@ public class Constants : MonoBehaviour
 
     public static readonly WeaponInfo swordInfo = new WeaponInfo(7, 7, 25, 40);
 
-    public const int maxBots = 10;
+    public const int maxBots = 5;
 
     public const float spawnXRange = 20;
     public const float spawnZRange = 11;
@@ -51,12 +56,14 @@ public class Constants : MonoBehaviour
     void Awake()
     {
         playerCharacterPrefab = Resources.Load<GameObject>("controlledPlayer");
+
+        prefabsFromType.Add(typeof(HealthItem), Resources.Load<GameObject>("HealthPickUp"));
+
         blockMovementMask = LayerMask.GetMask(new string[] { "wall", "player" });
         attackAnimationInfo = _attackAnimationInfo;
     }
 
     public static int blockMovementMask;
-
 
     public static T getComponentInParentOrChildren<T>(GameObject g) where T: Component
     {
@@ -72,6 +79,27 @@ public class Constants : MonoBehaviour
     public static System.TimeSpan timeDiff(System.DateTime timenow, System.DateTime timepast)
     {
         return timenow.Subtract(timepast);
+    }
+
+    public static int findBest<T>(List<T> li, best<T> f)
+    {
+        if (li.Count > 0)
+        {
+            T best = li[0];
+            int ret = 0;
+            for (int i = 0; i < li.Count; i++)
+            {
+                T t = li[i];
+                best = f(best, t);
+                ret = i;
+            }
+            return ret;
+        }
+        else
+        {
+            return -1;
+        }
+
     }
 }
 

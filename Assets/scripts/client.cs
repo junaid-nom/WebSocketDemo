@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 //using WebSocketSharp;
 using HybridWebSocket; // Have to use this because C# websocket libraries dont work with WEBGL.
 using System.Runtime.Serialization.Formatters.Binary;
@@ -50,7 +51,13 @@ public class NetworkObjectClient
 
 public class Client : MonoBehaviour
 {
+    // set via alert:
     public bool autoStartClient;
+    public Text displayAlert;
+    static Text _displayAlert;
+    static bool shouldDisplayAlert = false;
+    static float distanceToAlert = -1;
+
     public static Dictionary<string, NetworkObjectClient> objIDToObject = new Dictionary<string, NetworkObjectClient>();
     public static MessageManager clientMsgMan = new MessageManager();
 
@@ -58,6 +65,7 @@ public class Client : MonoBehaviour
     public static Dictionary<string, List<string>> myobjsByType = new Dictionary<string, List<string>>();
 
     public static WebSocket ws;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -65,6 +73,7 @@ public class Client : MonoBehaviour
         {
             startClient();
         }
+        _displayAlert = displayAlert;
     }
 
     // Update is called once per frame
@@ -92,7 +101,16 @@ public class Client : MonoBehaviour
             cp = clientMsgMan.popMessage<CopyMovement>();
         }
 
-        // TODO: Check all the values of dict, if their timeSinceHeartBeat is big, delete the game object and remove from the dict
+        // TODO: process world items here
+        WorldItem wi = clientMsgMan.popMessage<WorldItem>();
+        while (wi != null)
+        {
+            processWorldItem(wi);
+            wi = clientMsgMan.popMessage<WorldItem>();
+        }
+
+
+        // : Check all the values of dict, if their timeSinceHeartBeat is big, delete the game object and remove from the dict
         List<string> toDelete = new List<string>();
         foreach(var n in objIDToObject.Values)
         {
@@ -104,19 +122,53 @@ public class Client : MonoBehaviour
         DeleteMessage dm = clientMsgMan.popMessage<DeleteMessage>();
         while (dm != null)
         {
-            foreach(var o in objIDToObject.Values)
+            if (dm.objId != null)
             {
-                if (o.objectInfo.uid == dm.uid)
+                if (objIDToObject.ContainsKey(dm.objId))
                 {
-                    toDelete.Add(o.objectInfo.objectID);
+                    toDelete.Add(objIDToObject[dm.objId].objectInfo.objectID);
                 }
             }
+            else
+            {
+                foreach (var o in objIDToObject.Values)
+                {
+                    if (o.objectInfo.uid == dm.uid)
+                    {
+                        toDelete.Add(o.objectInfo.objectID);
+                    }
+                }
+            }
+            
             dm = clientMsgMan.popMessage<DeleteMessage>();
         }
 
-
         toDelete.ForEach(deleteNetObject);
         toDelete.Clear();
+    }
+
+    public static void displayAlertThisFrame(string toDisplay, float distance)
+    {
+        if (_displayAlert != null && (distanceToAlert < 0 || distance < distanceToAlert))
+        {
+            _displayAlert.text = toDisplay;
+            shouldDisplayAlert = true;
+            distanceToAlert = distance;
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (!shouldDisplayAlert)
+        {
+            displayAlert.enabled = false;
+        }
+        else
+        {
+            displayAlert.enabled = true;
+        }
+        shouldDisplayAlert = false;
+        distanceToAlert = -1;
     }
 
     void deleteNetObject(string objID)
@@ -149,6 +201,26 @@ public class Client : MonoBehaviour
             Debug.Log("Adding obj k:" + k);
             // add dictionary entry
             objIDToObject.Add(k, new NetworkObjectClient(ng, cp.objectInfo, System.DateTime.Now));
+        }
+    }
+
+    public void processWorldItem(WorldItem wi)
+    {
+        string k = wi.objectInfo.objectID;
+        if (objIDToObject.ContainsKey(k))
+        {
+            // TODO: Do I need to do more stuff here for items on the ground?
+            objIDToObject[k].timeSinceHeartbeat = System.DateTime.Now;
+        }
+        else
+        {
+            GameObject ng = Instantiate(Constants.prefabsFromType[wi.itemInfo.GetType()]);
+            ng.GetComponent<PickUp>().myObjId = wi.objectInfo.uid;
+            ng.name = "CLIENT" + ng.name;
+
+            Debug.Log("Adding obj k:" + k);
+            // add dictionary entry
+            objIDToObject.Add(k, new NetworkObjectClient(ng, wi.objectInfo, System.DateTime.Now));
         }
     }
 

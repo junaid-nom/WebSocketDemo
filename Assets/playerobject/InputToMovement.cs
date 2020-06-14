@@ -89,6 +89,7 @@ public class InputToMovement : MonoBehaviour
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(1));
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(2));
         newInp.buttonsDown.Add(Input.GetButton("dodge"));
+        newInp.buttonsDown.Add(Input.GetButton("pickup"));
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Plane plane = new Plane(Vector3.up, Vector3.zero);
@@ -166,14 +167,11 @@ public class InputToMovement : MonoBehaviour
             // change direction to what is pointed at
             var lookat = getRotationToLookAt(cp.localPosition, inp.target);
             cp.localRotation = lookat;
-            if (index > 0)
-                Debug.Log("target: " + inp.target + " lookat: " + lookat.eulerAngles);
             cp.anim_state = stateNames[index];
             cp.normalizedTime = 0;
         }
         else
         {
-           
             cp.anim_state = null;
             cp.normalizedTime = -1;
         }

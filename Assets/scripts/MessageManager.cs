@@ -5,7 +5,7 @@ using System;
 
 public enum NetworkObjectType
 {
-    playerCharacter,
+    playerCharacter, worldItem
 }
 
 [Serializable]
@@ -26,6 +26,37 @@ public class NetworkObjectInfo
         this.objectID = objectID;
         this.objectType = objectType;
         this.uid = uid;
+    }
+}
+
+[Serializable]
+public class ItemInfo
+{
+    
+}
+[Serializable]
+public class HealthItem : ItemInfo
+{
+    public float healthBonus;
+}
+[Serializable]
+public class WorldItem : Message
+{
+    public NetworkObjectInfo objectInfo;
+    public ItemInfo itemInfo;
+    public SerializableVector3 localPosition;
+    public int quantity;
+
+    public WorldItem(ItemInfo itemInfo, SerializableVector3 localPosition, int quantity)
+    {
+        this.itemInfo = itemInfo;
+        this.localPosition = localPosition;
+        this.quantity = quantity;
+    }
+
+    public override string ToString()
+    {
+        return "World Item: " + itemInfo.ToString() + " x:" + localPosition.x + " z:" + localPosition.z + " #:" + quantity;
     }
 }
 
@@ -147,14 +178,15 @@ public class ListMessage : Message
 public class DeleteMessage : Message
 {
     public string uid;
+    public string objId;
     public DeleteMessage()
     {
         //msgType = 7;
     }
-    public DeleteMessage(String uid)
+    public DeleteMessage(string uid, string objId)
     {
-        //msgType = 7;
         this.uid = uid;
+        this.objId = objId;
     }
 }
 

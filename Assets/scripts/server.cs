@@ -12,6 +12,9 @@ using ConditionalBehaviorList = System.Tuple<System.Collections.Generic.Dictiona
 using AIPriorityList = System.Collections.Generic.List<System.Tuple<System.Collections.Generic.Dictionary<Condition, bool>, System.Collections.Generic.List<System.Tuple<System.Collections.Generic.Dictionary<Condition, bool>, BotBehavior>>>>;
 
 
+// IDEAS: 
+// - Life steal % gained per kill up to 50% or something. Incentive to get "bigger" like in slither.io. People love getting stronger.
+
 public struct GotMessage
 {
     public string uid;
@@ -105,7 +108,19 @@ public static class BetterDict
     }
 }
 
+public class PlayerCollision
+{
+    public PlayerObject player;
+    public GameObject other;
+    public float distance;
 
+    public PlayerCollision(PlayerObject player, GameObject other, float distance)
+    {
+        this.player = player;
+        this.other = other;
+        this.distance = distance;
+    }
+}
 
 public class Server : MonoBehaviour
 {
@@ -117,8 +132,11 @@ public class Server : MonoBehaviour
     public static bool isOn = false;
 
     static Dictionary<string, Bot> uidToBot = new Dictionary<string, Bot>();
+    static Dictionary<string, WorldItem> objToItems = new Dictionary<string, WorldItem>();
 
     public static InspectorDebugger inspectorDebugger;
+
+    public static Dictionary<string, List<PlayerCollision>> playerCollisionsThisFrame = new Dictionary<string, List<PlayerCollision>>();
 
     private void Awake()
     {
@@ -191,6 +209,12 @@ public class Server : MonoBehaviour
                 um.customUpdate();
             }
 
+            // Send out worldItem messages. MAKE SURE AFTER CUSTOM UPDATE OF USER SO PICKUPS ARE DONE FIRST
+            foreach (var item in objToItems.Values)
+            {
+                broadcastMessageQueue.Add(item);
+            }
+
             // Send all messages out at once in a big list
             foreach (var msgs in uidToMessageQueue)
             {
@@ -202,7 +226,39 @@ public class Server : MonoBehaviour
         }
         
     }
-    
+
+    private void LateUpdate()
+    {
+        playerCollisionsThisFrame.Clear();
+    }
+
+    public static void tryPickUpItem(string objID, PlayerObject player)
+    {
+        if (objToItems.ContainsKey(objID))
+        {
+            var item = objToItems[objID];
+            if (item.quantity > 0)
+            {
+                item.quantity -= 1;
+
+                // actually process the item:
+                if (item.itemInfo.GetType() == typeof(HealthItem))
+                {
+                    var hi = (HealthItem)item.itemInfo;
+                    var hp = player.GetComponent<Health>();
+                    hp.changeHealth(hi.healthBonus);
+                }
+
+                if (item.quantity <= 0)
+                {
+                    broadcastMessageQueue.Add(new DeleteMessage(null, item.objectInfo.objectID));
+                    objToItems.Remove(objID);
+                }
+            }
+        }
+        
+    }
+
     public static void removeUserManager(string uid)
     {
         uidToUserM.Remove(uid);
@@ -325,6 +381,11 @@ public class Server : MonoBehaviour
             uidToBot.Add(b3.state.uid, b3);
             uidToBot.Add(b4.state.uid, b4);
             uidToBot.Add(b5.state.uid, b5);
+        }
+
+        // TODO initialize items, eventually should spawn them periodically somewhere in the update method?
+        {
+
         }
     }
 

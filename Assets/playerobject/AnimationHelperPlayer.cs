@@ -6,6 +6,7 @@ public class AnimationHelperPlayer : MonoBehaviour
 {
     Weapon weapon;
     Health health;
+    public PlayerObject player;
     // Start is called before the first frame update
     void Start()
     {
@@ -27,5 +28,25 @@ public class AnimationHelperPlayer : MonoBehaviour
     public void setDamageTakenMultiplier(float multi)
     {
         health.setDamageTakenMultiplier(multi);
+    }
+
+    public void pickUpItem()
+    {
+        if (Server.isOn)
+        {
+            // TODO: Get closest item to self.
+            if (Server.playerCollisionsThisFrame.ContainsKey(player.uid))
+            {
+                var colls = Server.playerCollisionsThisFrame[player.uid];
+                if (colls.Count > 0)
+                {
+                    var coll = colls[Constants.findBest<PlayerCollision>(colls, (coll1, coll2) => coll1.distance <= coll2.distance ? coll1 : coll2)];
+
+                    var item = coll.other.GetComponent<PickUp>();
+                    // Try to pick that item up (will fail if quantity = 0 already)
+                    Server.tryPickUpItem(item.gameObject.GetInstanceID() + "", coll.player);
+                }
+            }
+        }
     }
 }
