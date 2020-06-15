@@ -49,6 +49,10 @@ public class copyFromStruct : MonoBehaviour
                 if (hit.collider != null && hit.collider.gameObject != playerHitBox.gameObject)
                 {
                     //Debug.Log(playerHitBox.gameObject.GetInstanceID() + " " + this.gameObject.GetInstanceID() + " Got hit:" + hit.collider.gameObject.name + " " + hit.collider.gameObject.GetInstanceID());
+                    if (hit.collider.isTrigger)
+                    {
+                        transform.localPosition = mv.localPosition;
+                    }
                 }
                 else
                 {

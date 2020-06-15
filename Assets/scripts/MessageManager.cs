@@ -38,6 +38,11 @@ public class ItemInfo
 public class HealthItem : ItemInfo
 {
     public float healthBonus;
+
+    public HealthItem(float healthBonus)
+    {
+        this.healthBonus = healthBonus;
+    }
 }
 [Serializable]
 public class WorldItem : Message
@@ -47,8 +52,9 @@ public class WorldItem : Message
     public SerializableVector3 localPosition;
     public int quantity;
 
-    public WorldItem(ItemInfo itemInfo, SerializableVector3 localPosition, int quantity)
+    public WorldItem(NetworkObjectInfo objectInfo, ItemInfo itemInfo, SerializableVector3 localPosition, int quantity)
     {
+        this.objectInfo = objectInfo;
         this.itemInfo = itemInfo;
         this.localPosition = localPosition;
         this.quantity = quantity;

@@ -6,12 +6,13 @@ public class PickUp : MonoBehaviour
 {
     public string display; // set via inspector
     Collider coll;
-    public string myObjId = null; // Need to set this on creation
+    public string myObjId; // Need to set this on creation
 
     // Start is called before the first frame update
     void Start()
     {
         coll = GetComponent<Collider>();
+        myObjId = gameObject.GetInstanceID() + "";
     }
 
     // Update is called once per frame
@@ -22,6 +23,7 @@ public class PickUp : MonoBehaviour
     
     private void OnTriggerStay(Collider other)
     {
+        Debug.Log("TRIGGERED PICKUP");
         Debug.Assert(myObjId != null);
         if (Client.ws != null && Client.ws.GetState() == HybridWebSocket.WebSocketState.Open)
         {

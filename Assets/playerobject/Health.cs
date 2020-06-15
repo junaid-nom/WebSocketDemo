@@ -41,7 +41,7 @@ public class Health : MonoBehaviour
     public void changeHealth(float change)
     {
         float changeApply = change * damageTakenMultiplier;
-        if (changeApply != 0)
+        if (changeApply < 0)
         {
             health += changeApply;
             hpbar.setHPScale(health / startHP);

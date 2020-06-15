@@ -157,7 +157,7 @@ public class Client : MonoBehaviour
         }
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
         if (!shouldDisplayAlert)
         {

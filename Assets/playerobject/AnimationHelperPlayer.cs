@@ -6,12 +6,13 @@ public class AnimationHelperPlayer : MonoBehaviour
 {
     Weapon weapon;
     Health health;
-    public PlayerObject player;
+    PlayerObject player;
     // Start is called before the first frame update
     void Start()
     {
         weapon = GetComponentInChildren<Weapon>();
         health = GetComponentInChildren<Health>();
+        player = GetComponent<PlayerObject>();
     }
 
     // Update is called once per frame
@@ -34,6 +35,7 @@ public class AnimationHelperPlayer : MonoBehaviour
     {
         if (Server.isOn)
         {
+            Debug.Log("collided: " + Server.playerCollisionsThisFrame.Keys.Count);
             // TODO: Get closest item to self.
             if (Server.playerCollisionsThisFrame.ContainsKey(player.uid))
             {
@@ -44,7 +46,7 @@ public class AnimationHelperPlayer : MonoBehaviour
 
                     var item = coll.other.GetComponent<PickUp>();
                     // Try to pick that item up (will fail if quantity = 0 already)
-                    Server.tryPickUpItem(item.gameObject.GetInstanceID() + "", coll.player);
+                    Server.tryPickUpItem(item.gameObject, coll.player);
                 }
             }
         }

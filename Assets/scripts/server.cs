@@ -227,13 +227,14 @@ public class Server : MonoBehaviour
         
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
         playerCollisionsThisFrame.Clear();
     }
 
-    public static void tryPickUpItem(string objID, PlayerObject player)
+    public static void tryPickUpItem(GameObject pickup, PlayerObject player)
     {
+        string objID = pickup.GetInstanceID() + "";
         if (objToItems.ContainsKey(objID))
         {
             var item = objToItems[objID];
@@ -248,15 +249,15 @@ public class Server : MonoBehaviour
                     var hp = player.GetComponent<Health>();
                     hp.changeHealth(hi.healthBonus);
                 }
-
+                
                 if (item.quantity <= 0)
                 {
                     broadcastMessageQueue.Add(new DeleteMessage(null, item.objectInfo.objectID));
                     objToItems.Remove(objID);
+                    Destroy(pickup);
                 }
             }
         }
-        
     }
 
     public static void removeUserManager(string uid)
@@ -385,7 +386,19 @@ public class Server : MonoBehaviour
 
         // TODO initialize items, eventually should spawn them periodically somewhere in the update method?
         {
-
+            System.Action addHealth = () =>
+            {
+                var loc = getSpawnLocation();
+                var he1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(HealthItem)]);
+                he1.transform.position = loc;
+                WorldItem h1 = new WorldItem(new NetworkObjectInfo(he1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new HealthItem(5), loc, 1);
+                
+                objToItems.Add(h1.objectInfo.objectID, h1);
+            };
+            for (int i = 0; i< 5; i++)
+            {
+                addHealth();
+            }
         }
     }
 
