@@ -111,7 +111,7 @@ public class BotState
     {
         uid = BOTUIDPREFIX + botNumber;
         this.botNumber = botNumber;
-        charState.Add(new CharacterState(new CopyMovement(null, new Vector3(0,0,0), new Quaternion(), Constants.canMoveState, 0, false, 0))); // add one so dont have to do length > 0 all the time
+        charState.Add(new CharacterState(new CopyMovement(null, new Vector3(0,0,0), new Quaternion(), Constants.canMoveState, 0, false, 0, WeaponType.sword))); // add one so dont have to do length > 0 all the time
     }
 
     public override string ToString()

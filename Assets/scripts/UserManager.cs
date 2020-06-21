@@ -21,6 +21,7 @@ public class UserManager : MonoBehaviour
     copyFromStruct playerCopyController;
     Animator playerAnimator;
     Health playerHealth;
+    PlayerObject playerObject;
     private bool startUp;
     InputBuffer inputBuffer = new InputBuffer();
     public string currentConnID;
@@ -62,10 +63,10 @@ public class UserManager : MonoBehaviour
         playerCharacter.transform.localPosition = spawnLocation;
         playerCopyController = playerCharacter.GetComponent<copyFromStruct>();
         playerAnimator = playerCharacter.GetComponent<Animator>();
-        PlayerObject po = playerCharacter.GetComponent<PlayerObject>();
+        playerObject = playerCharacter.GetComponent<PlayerObject>();
         playerHealth = playerCharacter.GetComponent<Health>();
         playerCharacter.name = "P-" + usernet.uid;
-        po.uid = usernet.uid;
+        playerObject.uid = usernet.uid;
     }
 
     void processUserInputs()
@@ -81,14 +82,23 @@ public class UserManager : MonoBehaviour
             
         }
         UserInput finalui = inputBuffer.getInput();
-        CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth());
+
+        if (finalui.swapWeaponSlot)
+        {
+            playerObject.swapWeapon();
+        }
+
+        CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth(), playerObject.getEquipedWeapon());
         playerCopyController.setMovement(cp);
+
         if (cp.anim_state != null && cp.anim_state!="" && cp.anim_state != "canMoveState" && cp.normalizedTime == 0)
         {
             //reset inp buffer
             inputBuffer.clearBuffer();
         }
+
         Server.sendToAll(cp);
+        Server.sendToSpecificUser(currentConnID, playerObject.privateInfo);
     }
 
     void processOpenMessage()

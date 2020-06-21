@@ -65,6 +65,14 @@ public class Client : MonoBehaviour
     public static Dictionary<string, List<string>> myobjsByType = new Dictionary<string, List<string>>();
 
     public static WebSocket ws;
+    public static bool canPickup = false;
+
+    public static PrivatePlayerInfo privateInfo = new PrivatePlayerInfo(WeaponType.none, WeaponType.none, true);
+
+    public Text slot1;
+    public Text slot2;
+    public GameObject pickslot1;
+    public GameObject pickslot2;
 
     // Start is called before the first frame update
     void Start()
@@ -92,6 +100,13 @@ public class Client : MonoBehaviour
                 NetDebug.printBoth("Client got str message: " + sm.str);
             }
             sm = clientMsgMan.popMessage<StringMessage>();
+        }
+
+        PrivatePlayerInfo pi = clientMsgMan.popMessage<PrivatePlayerInfo>();
+        while (pi != null)
+        {
+            privateInfo = pi;
+            // set ui stuff
         }
 
         CopyMovement cp = clientMsgMan.popMessage<CopyMovement>();
@@ -147,12 +162,21 @@ public class Client : MonoBehaviour
         toDelete.Clear();
     }
 
+    public void setPrivateUI(PrivatePlayerInfo pi)
+    {
+        slot1.text = pi.slot1.ToString();
+        slot2.text = pi.slot2.ToString();
+        pickslot1.SetActive(pi.equipedSlot1);
+        pickslot2.SetActive(!pi.equipedSlot1);
+    }
+
     public static void displayAlertThisFrame(string toDisplay, float distance)
     {
         if (_displayAlert != null && (distanceToAlert < 0 || distance < distanceToAlert))
         {
             _displayAlert.text = toDisplay;
             shouldDisplayAlert = true;
+            canPickup = true;
             distanceToAlert = distance;
         }
     }
@@ -168,6 +192,7 @@ public class Client : MonoBehaviour
             displayAlert.enabled = true;
         }
         shouldDisplayAlert = false;
+        canPickup = false;
         distanceToAlert = -1;
     }
 

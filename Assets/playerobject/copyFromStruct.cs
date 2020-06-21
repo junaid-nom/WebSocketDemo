@@ -16,6 +16,7 @@ public class copyFromStruct : MonoBehaviour
     public Animator animator;
     public Collider playerHitBox;
     public Health health;
+    public PlayerObject playerObject;
     // Start is called before the first frame update
     void Start()
     {
@@ -73,6 +74,18 @@ public class copyFromStruct : MonoBehaviour
             if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < mv.normalizedTime || !animator.GetCurrentAnimatorStateInfo(0).IsName(mv.anim_state))
             {
                 animator.StopPlayback();
+                // TODO: Add stuff here for disabling weapons that aren't the one equiped
+                // playerobject set weapon
+                playerObject.enableWeapon(mv.weapon);
+                // animator set controller
+                animator.runtimeAnimatorController = Constants.weaponToAnimator[mv.weapon];
+                //if (mv.anim_state == "attack1")
+                //{
+                //    animator.runtimeAnimatorController = Constants.spear_animator;
+                //}else
+                //{
+                //    animator.runtimeAnimatorController = Constants.sword_animator;
+                //}
                 animator.Play(mv.anim_state, 0, mv.normalizedTime);
             }
         }

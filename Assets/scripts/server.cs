@@ -51,7 +51,7 @@ public class StoreMessages : WebSocketBehavior
         NetDebug.printBoth("Server got msg type: " + deser.msgType);
         MessageManager.debugMsg(deser);
         CopyMovement cptest = new CopyMovement();
-        cptest.anim_state = "anim2";
+        cptest.anim_state = "attack2";
         cptest.ignoreRotation = false;
         cptest.localPosition = new Vector3(1, 2, 3);
         cptest.localRotation = Quaternion.Euler(10, 20, 30);
@@ -249,7 +249,12 @@ public class Server : MonoBehaviour
                     var hp = player.GetComponent<Health>();
                     hp.changeHealth(hi.healthBonus);
                 }
-                
+                if (item.itemInfo.GetType() == typeof(WeaponItem))
+                {
+                    var weapon = (WeaponItem)item.itemInfo;
+                    player.pickUpWeapon(weapon.weapon);
+                }
+
                 if (item.quantity <= 0)
                 {
                     broadcastMessageQueue.Add(new DeleteMessage(null, item.objectInfo.objectID));

@@ -89,7 +89,7 @@ public class InputToMovement : MonoBehaviour
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(1));
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(2));
         newInp.buttonsDown.Add(Input.GetButton("dodge"));
-        newInp.buttonsDown.Add(Input.GetButton("pickup"));
+        newInp.buttonsDown.Add(Client.canPickup ? Input.GetButton("pickup") : false);
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Plane plane = new Plane(Vector3.up, Vector3.zero);
@@ -120,10 +120,11 @@ public class InputToMovement : MonoBehaviour
         return Quaternion.Euler(0, Quaternion.LookRotation((directionTo).normalized).eulerAngles.y, 0);
     }
 
-    public static CopyMovement inputToMovement(UserInput inp, Vector3 oldPositionLocal, Quaternion oldRotationLocal, float speed, Animator animator, string canChangeState, List<string> stateNames, string uid, float health)
+    public static CopyMovement inputToMovement(UserInput inp, Vector3 oldPositionLocal, Quaternion oldRotationLocal, float speed, Animator animator, string canChangeState, List<string> stateNames, string uid, float health, WeaponType weapon)
     {
         CopyMovement cp = new CopyMovement();
         // Have to use IsName because you can't check animation state directly. Though you can check animation clip I didn't here.
+        cp.weapon = weapon;
         bool canChange = animator.GetCurrentAnimatorStateInfo(0).IsName(canChangeState);
         bool canDodge = false;
         foreach (string s in Constants.dodgeFromStates)

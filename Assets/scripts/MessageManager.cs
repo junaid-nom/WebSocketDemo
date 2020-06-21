@@ -45,6 +45,16 @@ public class HealthItem : ItemInfo
     }
 }
 [Serializable]
+public class WeaponItem : ItemInfo
+{
+    public WeaponType weapon;
+
+    public WeaponItem(WeaponType weapon)
+    {
+        this.weapon = weapon;
+    }
+}
+[Serializable]
 public class WorldItem : Message
 {
     public NetworkObjectInfo objectInfo;
@@ -76,15 +86,14 @@ public class CopyMovement : Message
     public float normalizedTime;
     public bool ignoreRotation;
     public float health; // TODO THIS IS UNUSED NEED TO ACTUALLY DO STUFF! add Health component to copyFromtStruct. Also need to change inputToMovement function
+    public WeaponType weapon;
 
     public CopyMovement()
     {
-        //msgType = 1;
     }
 
-    public CopyMovement(NetworkObjectInfo objectInfo, SerializableVector3 localPosition, SerializableQuaternion localRotation, string anim_state, float normalizedTime, bool ignoreRotation, float health)
+    public CopyMovement(NetworkObjectInfo objectInfo, SerializableVector3 localPosition, SerializableQuaternion localRotation, string anim_state, float normalizedTime, bool ignoreRotation, float health, WeaponType weapon)
     {
-        //msgType = 1;
         this.objectInfo = objectInfo;
         this.localPosition = localPosition;
         this.localRotation = localRotation;
@@ -92,13 +101,29 @@ public class CopyMovement : Message
         this.normalizedTime = normalizedTime;
         this.ignoreRotation = ignoreRotation;
         this.health = health;
+        this.weapon = weapon;
     }
 
     public override string ToString()
     {
         return "loc:" + localPosition.ToString() + " rot: " + localRotation.ToString() + " anim: " + anim_state + " ntime: " + normalizedTime
-        + " ignoreRot: " + ignoreRotation + " health: " + health;
+        + " ignoreRot: " + ignoreRotation + " health: " + health + " weapon:" + weapon;
         ;
+    }
+}
+
+[Serializable]
+public class PrivatePlayerInfo : Message
+{
+    public WeaponType slot1 = WeaponType.sword;
+    public WeaponType slot2 = WeaponType.none;
+    public bool equipedSlot1 = true;
+
+    public PrivatePlayerInfo(WeaponType slot1, WeaponType slot2, bool equipedSlot1)
+    {
+        this.slot1 = slot1;
+        this.slot2 = slot2;
+        this.equipedSlot1 = equipedSlot1;
     }
 }
 
@@ -109,6 +134,7 @@ public class UserInput : Message
     public float y;
     public List<bool> buttonsDown;
     public SerializableVector3 target;
+    public bool swapWeaponSlot; // todo actually use
 
     public UserInput ()
     {

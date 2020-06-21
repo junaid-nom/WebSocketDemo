@@ -32,8 +32,15 @@ public class Constants : MonoBehaviour
     public const string canMoveState = "defAnim";
     public const string getHitState = "getHit";
     public const string pickUpState = "pickup";
-    public static readonly string[] charUserControlledStateNames = { "anim1", "anim2", "anim3_flip", "dodge", pickUpState }; // TODO Change to enum... and also use that enum to index CopyMovement ButtonsDown
+    public static readonly string[] charUserControlledStateNames = { "attack1", "attack2", "attack3", "dodge", pickUpState }; // TODO Change to enum... and also use that enum to index CopyMovement ButtonsDown
     public static readonly string[] dodgeFromStates = { getHitState, canMoveState, pickUpState };
+
+    public static RuntimeAnimatorController spear_animator;
+    public RuntimeAnimatorController _spear_animator;
+    public static RuntimeAnimatorController sword_animator;
+    public RuntimeAnimatorController _sword_animator;
+
+    public static readonly Dictionary<WeaponType, RuntimeAnimatorController> weaponToAnimator = new Dictionary<WeaponType, RuntimeAnimatorController>();
 
     public const float timeNeededToCounterAttack = .1f;
 
@@ -61,6 +68,11 @@ public class Constants : MonoBehaviour
 
         blockMovementMask = LayerMask.GetMask(new string[] { "wall", "player" });
         attackAnimationInfo = _attackAnimationInfo;
+        spear_animator = _spear_animator;
+        sword_animator = _sword_animator;
+
+        weaponToAnimator.Add(WeaponType.sword, sword_animator);
+        weaponToAnimator.Add(WeaponType.spear, spear_animator);
     }
 
     public static int blockMovementMask;
