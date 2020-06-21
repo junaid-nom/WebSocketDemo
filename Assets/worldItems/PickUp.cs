@@ -23,11 +23,9 @@ public class PickUp : MonoBehaviour
     
     private void OnTriggerStay(Collider other)
     {
-        Debug.Log("TRIGGERED PICKUP");
         Debug.Assert(myObjId != null);
         if (Client.ws != null && Client.ws.GetState() == HybridWebSocket.WebSocketState.Open)
         {
-            Debug.Log("" + gameObject.name + " Hit:" + other.gameObject.name);
             //Health hOther = Constants.getComponentInParentOrChildren<Health>(other.gameObject);
             PlayerObject p = Constants.getComponentInParentOrChildren<PlayerObject>(other.gameObject);
             

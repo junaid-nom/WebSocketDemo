@@ -26,6 +26,7 @@ public class UserManager : MonoBehaviour
     InputBuffer inputBuffer = new InputBuffer();
     public string currentConnID;
     bool closed = false;
+    public bool equipedSlot1 = true;
 
     // Start is called before the first frame update
     void Start()
@@ -83,12 +84,9 @@ public class UserManager : MonoBehaviour
         }
         UserInput finalui = inputBuffer.getInput();
 
-        if (finalui.swapWeaponSlot)
-        {
-            playerObject.swapWeapon();
-        }
+        equipedSlot1 = finalui.equipedSlot1;
 
-        CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth(), playerObject.getEquipedWeapon());
+        CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth(), playerObject.getEquipedWeapon(equipedSlot1));
         playerCopyController.setMovement(cp);
 
         if (cp.anim_state != null && cp.anim_state!="" && cp.anim_state != "canMoveState" && cp.normalizedTime == 0)

@@ -79,13 +79,6 @@ public class copyFromStruct : MonoBehaviour
                 playerObject.enableWeapon(mv.weapon);
                 // animator set controller
                 animator.runtimeAnimatorController = Constants.weaponToAnimator[mv.weapon];
-                //if (mv.anim_state == "attack1")
-                //{
-                //    animator.runtimeAnimatorController = Constants.spear_animator;
-                //}else
-                //{
-                //    animator.runtimeAnimatorController = Constants.sword_animator;
-                //}
                 animator.Play(mv.anim_state, 0, mv.normalizedTime);
             }
         }

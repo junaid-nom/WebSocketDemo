@@ -242,6 +242,7 @@ public class Server : MonoBehaviour
             {
                 item.quantity -= 1;
 
+                Debug.Log("Picked up type:" + item.itemInfo.GetType());
                 // actually process the item:
                 if (item.itemInfo.GetType() == typeof(HealthItem))
                 {
@@ -249,10 +250,11 @@ public class Server : MonoBehaviour
                     var hp = player.GetComponent<Health>();
                     hp.changeHealth(hi.healthBonus);
                 }
-                if (item.itemInfo.GetType() == typeof(WeaponItem))
+                if (Constants.IsSameOrSubclass(typeof(WeaponItem), item.itemInfo.GetType()))
                 {
+                    Debug.Log("Picked up weapon:" + item.itemInfo.GetType());
                     var weapon = (WeaponItem)item.itemInfo;
-                    player.pickUpWeapon(weapon.weapon);
+                    player.pickUpWeapon(weapon.weapon, uidToUserM[player.uid].equipedSlot1);
                 }
 
                 if (item.quantity <= 0)
@@ -400,9 +402,21 @@ public class Server : MonoBehaviour
                 
                 objToItems.Add(h1.objectInfo.objectID, h1);
             };
+
+            System.Action addSpear = () =>
+            {
+                var loc = getSpawnLocation();
+                var w1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(SpearItem)]);
+                w1.transform.position = loc;
+                w1.transform.Rotate(new Vector3(0, 1, 0), Random.Range(0, 360));
+                WorldItem wi1 = new WorldItem(new NetworkObjectInfo(w1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new SpearItem(), loc, 1);
+
+                objToItems.Add(wi1.objectInfo.objectID, wi1);
+            };
             for (int i = 0; i< 5; i++)
             {
                 addHealth();
+                addSpear();
             }
         }
     }

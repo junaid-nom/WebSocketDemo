@@ -45,6 +45,7 @@ public class InputBuffer
     public UserInput getInput()
     {
         clearOld();
+        // THIS INPUT QUEUE IS CLEARED EVERY TIME THERE IS A NEW ANIMATION (get hit, dodge, attack etc)
         UserInput inp;
         if (receivedInput.Count > 0)
         {
@@ -58,11 +59,13 @@ public class InputBuffer
             {
                 combined.buttonsDown = pressed[pressed.Count - 1].inp.buttonsDown;
                 combined.target = pressed[pressed.Count - 1].inp.target;
+                combined.equipedSlot1 = pressed[pressed.Count - 1].inp.equipedSlot1;
             }
             else
             {
                 combined.buttonsDown = lastInp.buttonsDown;// this is just an empty list
                 combined.target = lastInp.target;
+                combined.equipedSlot1 = lastInp.equipedSlot1;
             }
 
             inp = combined;
@@ -71,6 +74,7 @@ public class InputBuffer
         {
             inp = new UserInput();
             inp.buttonsDown = new List<bool>();
+            inp.equipedSlot1 = true;
         }
         
         return inp;
@@ -79,7 +83,9 @@ public class InputBuffer
 
 public class InputToMovement : MonoBehaviour
 {
-    public static UserInput getClientInput()
+
+
+    public static UserInput getClientInput(bool equipedSlot1)
     {
         UserInput newInp = new UserInput();
         newInp.x = Input.GetAxis("Horizontal");
@@ -90,6 +96,7 @@ public class InputToMovement : MonoBehaviour
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(2));
         newInp.buttonsDown.Add(Input.GetButton("dodge"));
         newInp.buttonsDown.Add(Client.canPickup ? Input.GetButton("pickup") : false);
+        newInp.equipedSlot1 = equipedSlot1;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Plane plane = new Plane(Vector3.up, Vector3.zero);
@@ -204,7 +211,12 @@ public class InputToMovement : MonoBehaviour
         if (Client.ws != null 
             && Client.ws.GetState() == HybridWebSocket.WebSocketState.Open)
         {
-            UserInput nowInput = getClientInput();
+            if (Input.GetButtonUp("swapweapon"))
+            {
+                Client.swapWeapon();
+            }
+
+            UserInput nowInput = getClientInput(Client.equipedSlot1);
             //Send msg to server
             Client.ws.Send(BinarySerializer.Serialize(nowInput));
 

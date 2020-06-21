@@ -67,12 +67,14 @@ public class Client : MonoBehaviour
     public static WebSocket ws;
     public static bool canPickup = false;
 
-    public static PrivatePlayerInfo privateInfo = new PrivatePlayerInfo(WeaponType.none, WeaponType.none, true);
+    public static PrivatePlayerInfo privateInfo = new PrivatePlayerInfo(WeaponType.none, WeaponType.none);
 
     public Text slot1;
     public Text slot2;
     public GameObject pickslot1;
     public GameObject pickslot2;
+
+    public static bool equipedSlot1 = true;
 
     // Start is called before the first frame update
     void Start()
@@ -106,7 +108,8 @@ public class Client : MonoBehaviour
         while (pi != null)
         {
             privateInfo = pi;
-            // set ui stuff
+            setPrivateUI(pi);
+            pi = clientMsgMan.popMessage<PrivatePlayerInfo>();
         }
 
         CopyMovement cp = clientMsgMan.popMessage<CopyMovement>();
@@ -166,8 +169,16 @@ public class Client : MonoBehaviour
     {
         slot1.text = pi.slot1.ToString();
         slot2.text = pi.slot2.ToString();
-        pickslot1.SetActive(pi.equipedSlot1);
-        pickslot2.SetActive(!pi.equipedSlot1);
+        pickslot1.SetActive(equipedSlot1);
+        pickslot2.SetActive(!equipedSlot1);
+    }
+
+    public static void swapWeapon()
+    {
+        if (privateInfo.slot2 != WeaponType.none)
+        {
+            equipedSlot1 = !equipedSlot1;
+        }
     }
 
     public static void displayAlertThisFrame(string toDisplay, float distance)
@@ -243,7 +254,6 @@ public class Client : MonoBehaviour
             ng.GetComponent<PickUp>().myObjId = wi.objectInfo.uid;
             ng.name = "CLIENT" + ng.name;
 
-            Debug.Log("Adding obj k:" + k);
             // add dictionary entry
             objIDToObject.Add(k, new NetworkObjectClient(ng, wi.objectInfo, System.DateTime.Now));
         }

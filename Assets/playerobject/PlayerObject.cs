@@ -17,12 +17,20 @@ public class PlayerObject : MonoBehaviour
     public GameObject spear;
 
     // Server private only:
-    public PrivatePlayerInfo privateInfo = new PrivatePlayerInfo(WeaponType.sword, WeaponType.none, true);
+    public PrivatePlayerInfo privateInfo = new PrivatePlayerInfo(WeaponType.sword, WeaponType.none);
 
     // set automatically:
     List<GameObject> weapons;
 
     private void Start()
+    {
+        if (weapons == null)
+        {
+            startup();
+        }
+    }
+
+    private void startup()
     {
         weapons = new List<GameObject>() { sword, spear };
     }
@@ -45,7 +53,11 @@ public class PlayerObject : MonoBehaviour
 
     public void enableWeapon(WeaponType w)
     {
-        foreach(var weap in weapons)
+        if (weapons == null)
+        {
+            startup();
+        }
+        foreach (var weap in weapons)
         {
             weap.gameObject.SetActive(false);
         }
@@ -53,16 +65,16 @@ public class PlayerObject : MonoBehaviour
         weaponTypeToWeapon(w).SetActive(true);
     }
 
-    public void pickUpWeapon(WeaponType w)
+    public void pickUpWeapon(WeaponType w, bool equipedSlot1)
     {
+        Debug.Log("Got equiped:" + equipedSlot1);
         if (privateInfo.slot2 == WeaponType.none)
         {
             privateInfo.slot2 = w;
-            privateInfo.equipedSlot1 = false;
         } 
         else
         {
-            if (privateInfo.equipedSlot1)
+            if (equipedSlot1)
             {
                 privateInfo.slot1 = w;
             }
@@ -72,16 +84,10 @@ public class PlayerObject : MonoBehaviour
             }
         }
     }
-
-    public void swapWeapon()
-    {
-        if (privateInfo.slot2 != WeaponType.none)
-            privateInfo.equipedSlot1 = !privateInfo.equipedSlot1;
-    }
     
-    public WeaponType getEquipedWeapon()
+    public WeaponType getEquipedWeapon(bool equipedSlot1)
     {
-        if (privateInfo.equipedSlot1)
+        if (equipedSlot1)
         {
             return privateInfo.slot1;
         }

@@ -65,6 +65,7 @@ public class Constants : MonoBehaviour
         playerCharacterPrefab = Resources.Load<GameObject>("controlledPlayer");
 
         prefabsFromType.Add(typeof(HealthItem), Resources.Load<GameObject>("HealthPickUp"));
+        prefabsFromType.Add(typeof(SpearItem), Resources.Load<GameObject>("SpearPickUp"));
 
         blockMovementMask = LayerMask.GetMask(new string[] { "wall", "player" });
         attackAnimationInfo = _attackAnimationInfo;
@@ -112,6 +113,12 @@ public class Constants : MonoBehaviour
             return -1;
         }
 
+    }
+
+    public static bool IsSameOrSubclass(System.Type potentialBase, System.Type potentialDescendant)
+    {
+        return potentialDescendant.IsSubclassOf(potentialBase)
+               || potentialDescendant == potentialBase;
     }
 }
 

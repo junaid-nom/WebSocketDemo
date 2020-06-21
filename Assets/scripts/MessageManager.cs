@@ -45,13 +45,21 @@ public class HealthItem : ItemInfo
     }
 }
 [Serializable]
-public class WeaponItem : ItemInfo
+public abstract class WeaponItem : ItemInfo
 {
     public WeaponType weapon;
 
-    public WeaponItem(WeaponType weapon)
+    public WeaponItem()
     {
-        this.weapon = weapon;
+        
+    }
+}
+[Serializable]
+public class SpearItem : WeaponItem
+{
+    public SpearItem()
+    {
+        weapon = WeaponType.spear;
     }
 }
 [Serializable]
@@ -117,13 +125,11 @@ public class PrivatePlayerInfo : Message
 {
     public WeaponType slot1 = WeaponType.sword;
     public WeaponType slot2 = WeaponType.none;
-    public bool equipedSlot1 = true;
 
-    public PrivatePlayerInfo(WeaponType slot1, WeaponType slot2, bool equipedSlot1)
+    public PrivatePlayerInfo(WeaponType slot1, WeaponType slot2)
     {
         this.slot1 = slot1;
         this.slot2 = slot2;
-        this.equipedSlot1 = equipedSlot1;
     }
 }
 
@@ -134,7 +140,7 @@ public class UserInput : Message
     public float y;
     public List<bool> buttonsDown;
     public SerializableVector3 target;
-    public bool swapWeaponSlot; // todo actually use
+    public bool equipedSlot1 = true; // need to default to true or else might equip slot2 which is empty
 
     public UserInput ()
     {
