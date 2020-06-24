@@ -69,15 +69,15 @@ public class copyFromStruct : MonoBehaviour
         {
             transform.localRotation = mv.localRotation;
         }
+        if (mv.anim_state == null) // basically only want to do this when not animating, or after a new animation starts
+            playerObject.enableWeapon(mv.weapon);
         if (mv.anim_state != null)
         {
             if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < mv.normalizedTime || !animator.GetCurrentAnimatorStateInfo(0).IsName(mv.anim_state))
             {
                 animator.StopPlayback();
-                // TODO: Add stuff here for disabling weapons that aren't the one equiped
-                // playerobject set weapon
-                playerObject.enableWeapon(mv.weapon);
                 // animator set controller
+                playerObject.enableWeapon(mv.weapon);
                 animator.runtimeAnimatorController = Constants.weaponToAnimator[mv.weapon];
                 animator.Play(mv.anim_state, 0, mv.normalizedTime);
             }

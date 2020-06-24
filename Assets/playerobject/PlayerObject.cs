@@ -20,7 +20,8 @@ public class PlayerObject : MonoBehaviour
     public PrivatePlayerInfo privateInfo = new PrivatePlayerInfo(WeaponType.sword, WeaponType.none);
 
     // set automatically:
-    List<GameObject> weapons;
+    List<Weapon> weapons;
+    List<GameObject> weaponObjects;
 
     private void Start()
     {
@@ -32,7 +33,8 @@ public class PlayerObject : MonoBehaviour
 
     private void startup()
     {
-        weapons = new List<GameObject>() { sword, spear };
+        weaponObjects = new List<GameObject>() { sword, spear };
+        weapons = new List<Weapon>() { sword.GetComponentInChildren<Weapon>(), spear.GetComponentInChildren<Weapon>() };
     }
 
     GameObject weaponTypeToWeapon(WeaponType w)
@@ -57,9 +59,9 @@ public class PlayerObject : MonoBehaviour
         {
             startup();
         }
-        foreach (var weap in weapons)
+        foreach (var weap in weaponObjects)
         {
-            weap.gameObject.SetActive(false);
+            weap.SetActive(false);
         }
 
         weaponTypeToWeapon(w).SetActive(true);
@@ -83,6 +85,18 @@ public class PlayerObject : MonoBehaviour
                 privateInfo.slot2 = w;
             }
         }
+    }
+
+    public Weapon getActiveWeapon()
+    {
+        foreach (var weap in weapons)
+        {
+            if (weap.gameObject.activeInHierarchy)
+            {
+                return weap;
+            }
+        }
+        return null;
     }
     
     public WeaponType getEquipedWeapon(bool equipedSlot1)

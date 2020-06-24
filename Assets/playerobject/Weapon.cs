@@ -28,6 +28,9 @@ public class Weapon : MonoBehaviour
             {
                 coll.enabled = true;
             }
+        } else
+        {
+            coll.enabled = false;
         }
     }
 

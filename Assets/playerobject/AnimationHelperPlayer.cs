@@ -4,13 +4,11 @@ using UnityEngine;
 
 public class AnimationHelperPlayer : MonoBehaviour
 {
-    Weapon weapon;
     Health health;
     PlayerObject player;
     // Start is called before the first frame update
     void Start()
     {
-        weapon = GetComponentInChildren<Weapon>();
         health = GetComponentInChildren<Health>();
         player = GetComponent<PlayerObject>();
     }
@@ -23,7 +21,12 @@ public class AnimationHelperPlayer : MonoBehaviour
 
     public void setDamage(float damage)
     {
-        weapon.setDamage(damage);
+        var weapon = player.getActiveWeapon();
+        if (weapon != null)
+        {
+            Debug.Log("active weapon:" + weapon.name);
+            weapon.setDamage(damage);
+        }
     }
 
     public void setDamageTakenMultiplier(float multi)
