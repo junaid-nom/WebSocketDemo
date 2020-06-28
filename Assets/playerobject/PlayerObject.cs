@@ -12,7 +12,13 @@ public class PlayerObject : MonoBehaviour
     // must be set when created:
     public string uid;
 
+    // auto set
+    Animator animator;
+    Health health;
+    public bool dead = false;
+
     // set in prefab:
+    public GameObject hitbox;
     public GameObject sword;
     public GameObject spear;
 
@@ -35,6 +41,8 @@ public class PlayerObject : MonoBehaviour
     {
         weaponObjects = new List<GameObject>() { sword, spear };
         weapons = new List<Weapon>() { sword.GetComponentInChildren<Weapon>(), spear.GetComponentInChildren<Weapon>() };
+        animator = GetComponent<Animator>();
+        health = GetComponent<Health>();
     }
 
     GameObject weaponTypeToWeapon(WeaponType w)
@@ -111,4 +119,45 @@ public class PlayerObject : MonoBehaviour
         }
     }
 
+    public void die()
+    {
+        dead = true;
+        animator.SetBool("dead", true);
+        List<GameObject> toDisable = new List<GameObject>(weaponObjects);
+        toDisable.Add(hitbox);
+        toDisable.Add(gameObject); // For ribid body
+        foreach (var gw in toDisable)
+        {
+            gw.GetComponentInChildren<Collider>().enabled = false;
+            var rb = gw.GetComponentInChildren<Rigidbody>();
+            if (rb != null)
+            {
+                rb.isKinematic = true;
+            }
+        }
+    }
+
+    public void respawn()
+    {
+        animator.SetBool("dead", false);
+        animator.Play(Constants.canMoveState, 0, 0);
+        List<GameObject> toDisable = new List<GameObject>(weaponObjects);
+        toDisable.Add(hitbox);
+        toDisable.Add(gameObject); // For ribid body
+        foreach (var gw in toDisable)
+        {
+            gw.GetComponentInChildren<Collider>().enabled = true;
+            var rb = gw.GetComponentInChildren<Rigidbody>();
+            if (rb != null)
+            {
+                rb.isKinematic = false;
+            }
+        }
+        gameObject.transform.position = Server.getSpawnLocation();
+
+        privateInfo = new PrivatePlayerInfo(WeaponType.sword, WeaponType.none);
+        health.setHealth(Constants.startHP);
+        dead = false;
+        
+    }
 }

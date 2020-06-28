@@ -221,6 +221,11 @@ public static class Bots
             return Behaviors.standStill(bot); 
         }
 
+        if (bot.charState[0].myState.anim_state == Constants.deathState)
+        {
+            return Behaviors.pickUpItem(bot);
+        }
+
         //: return null if BotBehavior is null, Otherwise get BotBehavior by going through ai
         BehaviorList blist = null;
         if (ai != null)

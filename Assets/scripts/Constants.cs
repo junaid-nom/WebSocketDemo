@@ -32,7 +32,8 @@ public class Constants : MonoBehaviour
     public const string canMoveState = "defAnim";
     public const string getHitState = "getHit";
     public const string pickUpState = "pickup";
-    public static readonly string[] charUserControlledStateNames = { "attack1", "attack2", "attack3", "dodge", pickUpState }; // TODO Change to enum... and also use that enum to index CopyMovement ButtonsDown
+    public const string deathState = "die";
+    public static readonly string[] charUserControlledStateNames = { "attack1", "attack2", "attack3", "dodge", pickUpState, deathState }; // TODO Change to enum... and also use that enum to index CopyMovement ButtonsDown
     public static readonly string[] dodgeFromStates = { getHitState, canMoveState, pickUpState };
 
     public static RuntimeAnimatorController spear_animator;

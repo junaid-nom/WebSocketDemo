@@ -416,6 +416,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hpbar: {fileID: 7735163662462991470}
+  hpBarParent: {fileID: 6292962112006919041}
   damageTakenMultiplier: 1
   invulChange: {fileID: 518486778}
   invulColor: {r: 1, g: 0.995283, b: 0.995283, a: 1}
@@ -433,6 +434,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uid: 
+  dead: 0
+  hitbox: {fileID: 4526716444658455266}
   sword: {fileID: 4526716444489829474}
   spear: {fileID: 1134111619655437312}
   privateInfo:

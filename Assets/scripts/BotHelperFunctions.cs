@@ -16,7 +16,7 @@ public static class BotHelpers
         List<CopyMovement> copyMovements = new List<CopyMovement>();
         cpMsgs.ForEach(cp => copyMovements.Add((CopyMovement)cp)); // cast
         // Get direction away from them
-        List<CopyMovement> enemies = copyMovements.FindAll(cp => cp.objectInfo.uid != bot.uid);
+        List<CopyMovement> enemies = copyMovements.FindAll(cp => cp.objectInfo.uid != bot.uid && cp.anim_state != Constants.deathState);
         return enemies;
     }
 
@@ -108,6 +108,10 @@ public static class Conditions
         // TODO: Eventually see what weapon they have equiped and use that ones info;
         float range = Constants.swordInfo.avgRange;
         CopyMovement closest = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.charState[0].myState.localPosition);
+        if (closest == null)
+        {
+            return false;
+        }
         return Vector3.Distance(bot.charState[0].myState.localPosition, closest.localPosition) <= range;
     }
 
@@ -116,6 +120,10 @@ public static class Conditions
         // TODO: Eventually see what weapon I have equiped and use that ones info;
         float range = Constants.swordInfo.avgRange;
         CopyMovement closest = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.charState[0].myState.localPosition);
+        if (closest == null)
+        {
+            return false;
+        }
         return Vector3.Distance(bot.charState[0].myState.localPosition, closest.localPosition) <= range;
     }
 
@@ -172,6 +180,10 @@ public static class Conditions
 
 public static class Behaviors
 {
+    public static List<bool> defaultButtons()
+    {
+        return new List<bool>() { false, false, false, false, false };
+    }
     public static BotBehavior RunAway = (bot) =>
     {
         UserInput ret = new UserInput();
@@ -186,7 +198,7 @@ public static class Behaviors
         ret.x = closestDir.x;
         ret.y = closestDir.y;
 
-        ret.buttonsDown = new List<bool>() { false, false, false, false };
+        ret.buttonsDown = defaultButtons();
         if (Conditions.EnemiesCouldAttackRange(bot))
         {
             ret.buttonsDown[3] = true;//dodge away
@@ -209,7 +221,7 @@ public static class Behaviors
         ret.x = closestDir.x;
         ret.y = closestDir.y;
 
-        ret.buttonsDown = new List<bool>() { false, false, false, false };
+        ret.buttonsDown = defaultButtons();
 
         ret.buttonsDown[3] = true;//dodge away
 
@@ -221,8 +233,18 @@ public static class Behaviors
         UserInput ret = new UserInput();
         ret.x = 0;
         ret.y = 0;
-        ret.buttonsDown = new List<bool>() { false, false, false, false };
+        ret.buttonsDown = defaultButtons();
 
+        return ret;
+    };
+
+    public static BotBehavior pickUpItem = (bot) =>
+    {
+        UserInput ret = new UserInput();
+        ret.x = 0;
+        ret.y = 0;
+        ret.buttonsDown = defaultButtons();
+        ret.buttonsDown[4] = true;
         return ret;
     };
 
@@ -238,14 +260,14 @@ public static class Behaviors
             ret.x = dir.x;
             ret.y = dir.y;
             Server.inspectorDebugger.addPair(new StringPair(bot.uid + "chase", "x:" + ret.x + "y" + ret.y));
-            ret.buttonsDown = new List<bool>() { false, false, false, false };
+            ret.buttonsDown = defaultButtons();
         }
         else
         {
             //Do nothing
             ret.x = 0;
             ret.y = 0;
-            ret.buttonsDown = new List<bool>() { false, false, false, false };
+            ret.buttonsDown = defaultButtons();
         }
 
         return ret;
@@ -265,7 +287,7 @@ public static class Behaviors
                 ret.y = dir.y;
                 Server.inspectorDebugger.addPair(new StringPair(bot.uid + "attack", "x:" + ret.x + "y" + ret.y));
 
-                ret.buttonsDown = new List<bool>() { false, false, false, false };
+                ret.buttonsDown = defaultButtons();
                 ret.buttonsDown[buttonIndex] = true;
                 ret.target = target.localPosition;
             }
@@ -274,7 +296,7 @@ public static class Behaviors
                 //Do nothing
                 ret.x = 0;
                 ret.y = 0;
-                ret.buttonsDown = new List<bool>() { false, false, false, false };
+                ret.buttonsDown = defaultButtons();
             }
 
             return ret;

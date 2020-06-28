@@ -349,7 +349,7 @@ public class Server : MonoBehaviour
         }
     }
 
-    public Vector3 getSpawnLocation()
+    public static Vector3 getSpawnLocation()
     {
         float x = Random.Range(-1 * Constants.spawnXRange, Constants.spawnXRange);
         float z = Random.Range(-1 * Constants.spawnZRange, Constants.spawnZRange);

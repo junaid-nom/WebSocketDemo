@@ -95,7 +95,7 @@ public class InputToMovement : MonoBehaviour
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(1));
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(2));
         newInp.buttonsDown.Add(Input.GetButton("dodge"));
-        newInp.buttonsDown.Add(Client.canPickup ? Input.GetButton("pickup") : false);
+        newInp.buttonsDown.Add(Client.canPickup || Client.dead ? Input.GetButton("pickup") : false);
         newInp.equipedSlot1 = equipedSlot1;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -234,11 +234,7 @@ public class InputToMovement : MonoBehaviour
             }
             
         }
-        
-
-
         //StartCoroutine(SendInputAfterTime(sendPingSecs, nowInput)); // all movement is delayed, but locally change the rotation right away
-
 
         //bool canChange = instantFeedbackAnimator.GetCurrentAnimatorStateInfo(0).IsName(canMoveState);
         //if (canChange && (nowInput.x != 0 || nowInput.y != 0))

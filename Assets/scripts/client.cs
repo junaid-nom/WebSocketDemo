@@ -56,6 +56,7 @@ public class Client : MonoBehaviour
     public Text displayAlert;
     static Text _displayAlert;
     static bool shouldDisplayAlert = false;
+    public static bool dead = false;
     static float distanceToAlert = -1;
 
     public static Dictionary<string, NetworkObjectClient> objIDToObject = new Dictionary<string, NetworkObjectClient>();
@@ -194,13 +195,17 @@ public class Client : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!shouldDisplayAlert)
+        if (!shouldDisplayAlert && !dead)
         {
             displayAlert.enabled = false;
         }
         else
         {
             displayAlert.enabled = true;
+            if (dead)
+            {
+                _displayAlert.text = "Press E to respawn";
+            }
         }
         shouldDisplayAlert = false;
         canPickup = false;
@@ -220,6 +225,15 @@ public class Client : MonoBehaviour
         {
             if (cp.anim_state == Constants.canMoveState)
                 cp.ignoreRotation = true;
+            if (cp.anim_state == Constants.deathState)
+            {
+                dead = true;
+                equipedSlot1 = true;
+            }
+            else
+            {
+                dead = false;
+            }
             myobjsByType.AddOrCreate<string, List<string>, string>(Enum.GetName(typeof(NetworkObjectType), NetworkObjectType.playerCharacter), k);
         }
         if (objIDToObject.ContainsKey(k))

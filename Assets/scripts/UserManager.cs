@@ -89,6 +89,11 @@ public class UserManager : MonoBehaviour
         CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth(), playerObject.getEquipedWeapon(equipedSlot1));
         playerCopyController.setMovement(cp);
 
+        if (playerObject.dead && finalui.buttonsDown[4])
+        {
+            playerObject.respawn();
+        }
+
         if (cp.anim_state != null && cp.anim_state!="" && cp.anim_state != "canMoveState" && cp.normalizedTime == 0)
         {
             //reset inp buffer
