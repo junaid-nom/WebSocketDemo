@@ -45,10 +45,25 @@ public class Weapon : MonoBehaviour
     {
         //Debug.Log("" + myp.gameObject.name + " Hit:" + other.gameObject.name);
         Health hOther = Constants.getComponentInParentOrChildren<Health>(other.gameObject);
-        PlayerObject p = Constants.getComponentInParentOrChildren<PlayerObject>(other.gameObject);
-        if ((p== null || p.uid != myp.uid) && hOther != null && !hitAlready.Contains(hOther))
+        PlayerObject otherP = Constants.getComponentInParentOrChildren<PlayerObject>(other.gameObject);
+        if ((otherP== null || otherP.uid != myp.uid) && hOther != null && !hitAlready.Contains(hOther))
         {
-            hOther.changeHealth(-1 * damage);
+            float damageDone = Mathf.Abs(hOther.changeHealth(-1 * damage));
+            if (damageDone != 0)
+            {
+                // life steal
+                float lifeGained = Constants.scoreToLifesteal(myp.score) * damageDone;
+                myp.health.changeHealth(lifeGained);
+                NetDebug.printBoth("Got life: " + lifeGained);
+
+                // Update score
+                int scoreEffective = (otherP.score + Constants.baseScore);
+                myp.score += (int)(((damageDone / Constants.startHP) * scoreEffective) * Constants.damageScoreFactor);
+                if (hOther.getHealth() <= 0)
+                {
+                    myp.score += (int)(scoreEffective * Constants.damageScoreFactor);
+                }
+            }
             hitAlready.Add(hOther);
         }
     }

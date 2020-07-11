@@ -83,6 +83,7 @@ public class copyFromStruct : MonoBehaviour
             }
         }
         health.setHealth(mv.health);
+        playerObject.score = mv.score;
     }
 
     public static IEnumerator SendAfterTime(float time, CopyMovement cp, copyFromStruct obj)

@@ -14,6 +14,7 @@ using AIPriorityList = System.Collections.Generic.List<System.Tuple<System.Colle
 
 // IDEAS: 
 // - Life steal % gained per kill up to 50% or something. Incentive to get "bigger" like in slither.io. People love getting stronger.
+// - Maybe Your score also influences your basic movement speed (up to a max)?
 
 public struct GotMessage
 {

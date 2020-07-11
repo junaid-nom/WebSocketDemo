@@ -8,7 +8,7 @@ public static class NetDebug
     static int debugLevel = 7;//higher the level, the less that gets printed. 0-7. 7 is for player ready version
 
     static string textSaved = "";
-    static int netLinesMax = 300;
+    static int netLinesMax = 10;
     static string netDebug
     {
         get
@@ -20,7 +20,7 @@ public static class NetDebug
                 string[] statements = textToPrint.Split('\n');
                 //print("statementsL = " + statements.Length);
                 textToPrint = "";
-                for (int i = 1; i < statements.Length; i++)
+                for (int i = statements.Length-netLinesMax; i < statements.Length; i++)
                 {
                     string end = "\n";
                     if (i == statements.Length - 1)
@@ -42,7 +42,7 @@ public static class NetDebug
 
     public static string getText()
     {
-        return textSaved.ToString();
+        return netDebug;
     }
 
     public static string printDictionaryKeys<T1,T2>(Dictionary<T1,T2> cb)

@@ -26,6 +26,11 @@ public class Constants : MonoBehaviour
 {
     public const float charMoveSpeed = 10;
     public const float startHP = 100;
+    public const int baseScore = 100;
+    public const int startScore = 0;
+    public const float damageScoreFactor = .2f;
+    public const float scoreToLifeSteal = .002f;
+    public const float maxLifeSteal = .5f;
 
     public const int inputLifetimeMS = 400;
 
@@ -120,6 +125,11 @@ public class Constants : MonoBehaviour
     {
         return potentialDescendant.IsSubclassOf(potentialBase)
                || potentialDescendant == potentialBase;
+    }
+
+    public static float scoreToLifesteal(int score)
+    {
+        return Mathf.Min(Constants.scoreToLifeSteal * score, Constants.maxLifeSteal);
     }
 }
 

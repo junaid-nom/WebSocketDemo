@@ -11,10 +11,11 @@ public class PlayerObject : MonoBehaviour
 {
     // must be set when created:
     public string uid;
+    public int score = Constants.startScore;
 
     // auto set
     Animator animator;
-    Health health;
+    public Health health;
     public bool dead = false;
 
     // set in prefab:
@@ -43,6 +44,7 @@ public class PlayerObject : MonoBehaviour
         weapons = new List<Weapon>() { sword.GetComponentInChildren<Weapon>(), spear.GetComponentInChildren<Weapon>() };
         animator = GetComponent<Animator>();
         health = GetComponent<Health>();
+        score = Constants.startScore;
     }
 
     GameObject weaponTypeToWeapon(WeaponType w)
@@ -51,13 +53,13 @@ public class PlayerObject : MonoBehaviour
         {
             case WeaponType.sword:
                 return sword;
-                break;
+                //break;
             case WeaponType.spear:
                 return spear;
-                break;
+                //break;
             default:
                 throw new KeyNotFoundException();
-                return null; // should never happen
+                //return null; // should never happen
         }
     }
 
@@ -121,6 +123,7 @@ public class PlayerObject : MonoBehaviour
 
     public void die()
     {
+        score = Constants.startScore;
         dead = true;
         animator.SetBool("dead", true);
         List<GameObject> toDisable = new List<GameObject>(weaponObjects);

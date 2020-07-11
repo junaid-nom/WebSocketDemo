@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using HybridWebSocket; // Have to use this because C# websocket libraries dont work with WEBGL.
 using System.Runtime.Serialization.Formatters.Binary;
 using System;
+using TMPro;
 
 public static class BinarySerializer
 {
@@ -74,6 +75,7 @@ public class Client : MonoBehaviour
     public Text slot2;
     public GameObject pickslot1;
     public GameObject pickslot2;
+    public TextMeshProUGUI lifesteal;
 
     public static bool equipedSlot1 = true;
 
@@ -224,7 +226,9 @@ public class Client : MonoBehaviour
         if (cp.objectInfo.uid == myUID)
         {
             if (cp.anim_state == Constants.canMoveState)
+            {
                 cp.ignoreRotation = true;
+            }
             if (cp.anim_state == Constants.deathState)
             {
                 dead = true;
@@ -235,6 +239,7 @@ public class Client : MonoBehaviour
                 dead = false;
             }
             myobjsByType.AddOrCreate<string, List<string>, string>(Enum.GetName(typeof(NetworkObjectType), NetworkObjectType.playerCharacter), k);
+            lifesteal.text = $"LifeSteal: {100 * Constants.scoreToLifesteal(cp.score)}%";
         }
         if (objIDToObject.ContainsKey(k))
         {

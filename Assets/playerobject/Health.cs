@@ -30,6 +30,15 @@ public class Health : MonoBehaviour
         if (health <= 0)
         {
             hpBarParent.SetActive(false);
+            // Solves rare bug where might get stuck and not display death anim sometimes
+            if (getHitAnimator.GetCurrentAnimatorClipInfo(0)[0].clip.name != Constants.deathState)
+            {
+                getHitAnimator.StopPlayback();
+                getHitAnimator.Play(Constants.deathState, 0, 0);
+                // TODO: disable health bar. set colliders to off. show "Press E to revive"
+                // disable all colliders
+                playerObject.die();
+            }
         }
         else
         {
@@ -49,12 +58,13 @@ public class Health : MonoBehaviour
         return health;
     }
 
-    public void changeHealth(float change)
+    public float changeHealth(float change)
     {
-        float changeApply = change * damageTakenMultiplier;
+        float changeApply = change * (change < 0 ? damageTakenMultiplier : 1);
         if (changeApply != 0)
         {
             health += changeApply;
+            health = Mathf.Min(health, startHP);
             hpbar.setHPScale(health / startHP);
             if (changeApply < 0)
             {
@@ -74,7 +84,7 @@ public class Health : MonoBehaviour
                 }
             }
         }
-
+        return changeApply;
     }
 
     public void setDamageTakenMultiplier(float multi)

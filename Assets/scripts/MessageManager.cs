@@ -94,13 +94,14 @@ public class CopyMovement : Message
     public float normalizedTime;
     public bool ignoreRotation;
     public float health; // TODO THIS IS UNUSED NEED TO ACTUALLY DO STUFF! add Health component to copyFromtStruct. Also need to change inputToMovement function
+    public int score;
     public WeaponType weapon;
 
     public CopyMovement()
     {
     }
 
-    public CopyMovement(NetworkObjectInfo objectInfo, SerializableVector3 localPosition, SerializableQuaternion localRotation, string anim_state, float normalizedTime, bool ignoreRotation, float health, WeaponType weapon)
+    public CopyMovement(NetworkObjectInfo objectInfo, SerializableVector3 localPosition, SerializableQuaternion localRotation, string anim_state, float normalizedTime, bool ignoreRotation, float health, WeaponType weapon, int score)
     {
         this.objectInfo = objectInfo;
         this.localPosition = localPosition;
@@ -110,12 +111,13 @@ public class CopyMovement : Message
         this.ignoreRotation = ignoreRotation;
         this.health = health;
         this.weapon = weapon;
+        this.score = score;
     }
 
     public override string ToString()
     {
         return "loc:" + localPosition.ToString() + " rot: " + localRotation.ToString() + " anim: " + anim_state + " ntime: " + normalizedTime
-        + " ignoreRot: " + ignoreRotation + " health: " + health + " weapon:" + weapon;
+        + " ignoreRot: " + ignoreRotation + " health: " + health + " weapon:" + weapon + " scoore:" + score;
         ;
     }
 }

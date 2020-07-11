@@ -86,7 +86,7 @@ public class UserManager : MonoBehaviour
 
         equipedSlot1 = finalui.equipedSlot1;
 
-        CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth(), playerObject.getEquipedWeapon(equipedSlot1));
+        CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth(), playerObject.getEquipedWeapon(equipedSlot1), playerObject.score);
         playerCopyController.setMovement(cp);
 
         if (playerObject.dead && finalui.buttonsDown[4])
