@@ -399,7 +399,7 @@ public class Server : MonoBehaviour
                 var loc = getSpawnLocation();
                 var he1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(HealthItem)]);
                 he1.transform.position = loc;
-                WorldItem h1 = new WorldItem(new NetworkObjectInfo(he1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new HealthItem(5), loc, 1);
+                WorldItem h1 = new WorldItem(new NetworkObjectInfo(he1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new HealthItem(5), loc, he1.transform.localRotation, 1);
                 
                 objToItems.Add(h1.objectInfo.objectID, h1);
             };
@@ -410,7 +410,7 @@ public class Server : MonoBehaviour
                 var w1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(SpearItem)]);
                 w1.transform.position = loc;
                 w1.transform.Rotate(new Vector3(0, 1, 0), Random.Range(0, 360));
-                WorldItem wi1 = new WorldItem(new NetworkObjectInfo(w1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new SpearItem(), loc, 1);
+                WorldItem wi1 = new WorldItem(new NetworkObjectInfo(w1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new SpearItem(), loc, w1.transform.localRotation, 1);
 
                 objToItems.Add(wi1.objectInfo.objectID, wi1);
             };

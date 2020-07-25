@@ -751,6 +751,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d1b3b8c5a697054ea4e26ae3932c6cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dontDisableColliders:
+  - {fileID: 4526716444658455260}
+  dontDisableRigidBodies:
+  - {fileID: 701105801423683021}
 --- !u!1 &4526716443743390935
 GameObject:
   m_ObjectHideFlags: 0

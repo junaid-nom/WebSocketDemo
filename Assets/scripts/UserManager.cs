@@ -68,6 +68,7 @@ public class UserManager : MonoBehaviour
         playerHealth = playerCharacter.GetComponent<Health>();
         playerCharacter.name = "P-" + usernet.uid;
         playerObject.uid = usernet.uid;
+        playerObject.isClientObject = false;
     }
 
     void processUserInputs()
@@ -89,7 +90,7 @@ public class UserManager : MonoBehaviour
         CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth(), playerObject.getEquipedWeapon(equipedSlot1), playerObject.score);
         playerCopyController.setMovement(cp);
 
-        if (playerObject.dead && finalui.buttonsDown[4])
+        if (playerObject.dead && finalui.buttonsDown.Count>=5 &&  finalui.buttonsDown[4])
         {
             playerObject.respawn();
         }

@@ -12,6 +12,7 @@ public class PlayerObject : MonoBehaviour
     // must be set when created:
     public string uid;
     public int score = Constants.startScore;
+    public bool isClientObject = false;
 
     // auto set
     Animator animator;
@@ -79,20 +80,23 @@ public class PlayerObject : MonoBehaviour
 
     public void pickUpWeapon(WeaponType w, bool equipedSlot1)
     {
-        Debug.Log("Got equiped:" + equipedSlot1);
-        if (privateInfo.slot2 == WeaponType.none)
+        if (Server.isOn)
         {
-            privateInfo.slot2 = w;
-        } 
-        else
-        {
-            if (equipedSlot1)
+            Debug.Log("Got equiped:" + equipedSlot1);
+            if (privateInfo.slot2 == WeaponType.none)
             {
-                privateInfo.slot1 = w;
+                privateInfo.slot2 = w;
             }
             else
             {
-                privateInfo.slot2 = w;
+                if (equipedSlot1)
+                {
+                    privateInfo.slot1 = w;
+                }
+                else
+                {
+                    privateInfo.slot2 = w;
+                }
             }
         }
     }
@@ -123,44 +127,49 @@ public class PlayerObject : MonoBehaviour
 
     public void die()
     {
-        score = Constants.startScore;
-        dead = true;
-        animator.SetBool("dead", true);
-        List<GameObject> toDisable = new List<GameObject>(weaponObjects);
-        toDisable.Add(hitbox);
-        toDisable.Add(gameObject); // For ribid body
-        foreach (var gw in toDisable)
+        if (Server.isOn)
         {
-            gw.GetComponentInChildren<Collider>().enabled = false;
-            var rb = gw.GetComponentInChildren<Rigidbody>();
-            if (rb != null)
+            score = Constants.startScore;
+            dead = true;
+            animator.SetBool("dead", true);
+            List<GameObject> toDisable = new List<GameObject>(weaponObjects);
+            toDisable.Add(hitbox);
+            toDisable.Add(gameObject); // For ribid body
+            foreach (var gw in toDisable)
             {
-                rb.isKinematic = true;
+                gw.GetComponentInChildren<Collider>().enabled = false;
+                var rb = gw.GetComponentInChildren<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.isKinematic = true;
+                }
             }
         }
     }
 
     public void respawn()
     {
-        animator.SetBool("dead", false);
-        animator.Play(Constants.canMoveState, 0, 0);
-        List<GameObject> toDisable = new List<GameObject>(weaponObjects);
-        toDisable.Add(hitbox);
-        toDisable.Add(gameObject); // For ribid body
-        foreach (var gw in toDisable)
+        if (Server.isOn)
         {
-            gw.GetComponentInChildren<Collider>().enabled = true;
-            var rb = gw.GetComponentInChildren<Rigidbody>();
-            if (rb != null)
+            animator.SetBool("dead", false);
+            animator.Play(Constants.canMoveState, 0, 0);
+            List<GameObject> toDisable = new List<GameObject>(weaponObjects);
+            toDisable.Add(hitbox);
+            toDisable.Add(gameObject); // For ribid body
+            foreach (var gw in toDisable)
             {
-                rb.isKinematic = false;
+                gw.GetComponentInChildren<Collider>().enabled = true;
+                var rb = gw.GetComponentInChildren<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.isKinematic = false;
+                }
             }
-        }
-        gameObject.transform.position = Server.getSpawnLocation();
+            gameObject.transform.position = Server.getSpawnLocation();
 
-        privateInfo = new PrivatePlayerInfo(WeaponType.sword, WeaponType.none);
-        health.setHealth(Constants.startHP);
-        dead = false;
-        
+            privateInfo = new PrivatePlayerInfo(WeaponType.sword, WeaponType.none);
+            health.setHealth(Constants.startHP);
+            dead = false;
+        }
     }
 }

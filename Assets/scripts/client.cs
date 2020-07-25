@@ -250,7 +250,9 @@ public class Client : MonoBehaviour
             // :
             // create new game object of type blah
             GameObject ng = Instantiate(Constants.playerCharacterPrefab);
-            ng.GetComponent<PlayerObject>().uid = cp.objectInfo.uid;
+            var po = ng.GetComponent<PlayerObject>();
+            po.uid = cp.objectInfo.uid;
+            po.isClientObject = true;
             ng.name = "CLIENT" + ng.name;
             
             Debug.Log("Adding obj k:" + k);
@@ -272,7 +274,8 @@ public class Client : MonoBehaviour
             GameObject ng = Instantiate(Constants.prefabsFromType[wi.itemInfo.GetType()]);
             ng.GetComponent<PickUp>().myObjId = wi.objectInfo.uid;
             ng.name = "CLIENT" + ng.name;
-
+            ng.transform.position = wi.localPosition;
+            ng.transform.localRotation = wi.localRotation;
             // add dictionary entry
             objIDToObject.Add(k, new NetworkObjectClient(ng, wi.objectInfo, System.DateTime.Now));
         }

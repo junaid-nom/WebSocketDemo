@@ -17,6 +17,7 @@ public class copyFromStruct : MonoBehaviour
     public Collider playerHitBox;
     public Health health;
     public PlayerObject playerObject;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -73,7 +74,7 @@ public class copyFromStruct : MonoBehaviour
             playerObject.enableWeapon(mv.weapon);
         if (mv.anim_state != null)
         {
-            if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < mv.normalizedTime || !animator.GetCurrentAnimatorStateInfo(0).IsName(mv.anim_state))
+            if ((animator.GetCurrentAnimatorStateInfo(0).normalizedTime < mv.normalizedTime || animator.GetCurrentAnimatorStateInfo(0).normalizedTime - mv.normalizedTime > .1) || !animator.GetCurrentAnimatorStateInfo(0).IsName(mv.anim_state))
             {
                 animator.StopPlayback();
                 // animator set controller
@@ -81,6 +82,11 @@ public class copyFromStruct : MonoBehaviour
                 animator.runtimeAnimatorController = Constants.weaponToAnimator[mv.weapon];
                 animator.Play(mv.anim_state, 0, mv.normalizedTime);
             }
+        } else if(playerObject.isClientObject) 
+        {
+            // only revert to default for client version because otherwise weird shit will happen for gethit animation because it will be OVERWRITTEN by the copystruct
+            // This would fuck up any animation set not by copystruct here on server.
+            animator.Play(Constants.canMoveState, 0, mv.normalizedTime);
         }
         health.setHealth(mv.health);
         playerObject.score = mv.score;

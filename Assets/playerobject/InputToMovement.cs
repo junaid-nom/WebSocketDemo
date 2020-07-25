@@ -51,8 +51,7 @@ public class InputBuffer
         {
             UserInput combined = new UserInput();
             UserInput lastInp = receivedInput[receivedInput.Count - 1].inp;
-            combined.x = lastInp.x;
-            combined.y = lastInp.y;
+            
             
             List<InputTimed> pressed = receivedInput.FindAll(inps => inps.inp.buttonsDown.Contains(true));
             if (pressed.Count > 0)
@@ -60,12 +59,16 @@ public class InputBuffer
                 combined.buttonsDown = pressed[pressed.Count - 1].inp.buttonsDown;
                 combined.target = pressed[pressed.Count - 1].inp.target;
                 combined.equipedSlot1 = pressed[pressed.Count - 1].inp.equipedSlot1;
+                combined.x = pressed[pressed.Count - 1].inp.x;
+                combined.y = pressed[pressed.Count - 1].inp.y;
             }
             else
             {
                 combined.buttonsDown = lastInp.buttonsDown;// this is just an empty list
                 combined.target = lastInp.target;
                 combined.equipedSlot1 = lastInp.equipedSlot1;
+                combined.x = lastInp.x;
+                combined.y = lastInp.y;
             }
 
             inp = combined;
@@ -95,7 +98,7 @@ public class InputToMovement : MonoBehaviour
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(1));
         newInp.buttonsDown.Add(Input.GetMouseButtonDown(2));
         newInp.buttonsDown.Add(Input.GetButton("dodge"));
-        newInp.buttonsDown.Add(Client.canPickup || Client.dead ? Input.GetButton("pickup") : false);
+        newInp.buttonsDown.Add((Client.canPickup || Client.dead) ? Input.GetButton("pickup") : false);
         newInp.equipedSlot1 = equipedSlot1;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -159,7 +162,7 @@ public class InputToMovement : MonoBehaviour
 
         int index = inp.buttonsDown.FindIndex(u => u);
         
-        if (canDodge && inp.buttonsDown != null && inp.buttonsDown.Count >=3 && inp.buttonsDown[3])
+        if (canDodge && inp.buttonsDown != null && inp.buttonsDown.Count > 3 && inp.buttonsDown[3])
         {
             cp.localRotation = getRotationFromInput(inp);
             cp.anim_state = stateNames[3];
@@ -181,6 +184,10 @@ public class InputToMovement : MonoBehaviour
         }
         else
         {
+            if (!uid.Contains("BOT"))
+            {
+                Debug.Log("wtf got empty state " + animator.GetCurrentAnimatorClipInfo(0)[0].clip.name);
+            }
             cp.anim_state = null;
             cp.normalizedTime = -1;
         }
