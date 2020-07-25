@@ -79,6 +79,12 @@ public class Client : MonoBehaviour
 
     public static bool equipedSlot1 = true;
 
+    float timeSincePing = 0;
+    float lastPingDiff = 0;
+    public TextMeshProUGUI pingDisplay;
+
+    public bool useLocal;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -92,6 +98,13 @@ public class Client : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (ws != null && ws.GetState() == WebSocketState.Open && Time.time - timeSincePing > 3)
+        {
+            // send ping msg
+            PingMessage newPing = new PingMessage(Time.time);
+            ws.Send(BinarySerializer.Serialize(newPing));
+            timeSincePing = Time.time;
+        }
         StringMessage sm = clientMsgMan.popMessage<StringMessage>();
         while (sm != null)
         {
@@ -105,6 +118,14 @@ public class Client : MonoBehaviour
                 NetDebug.printBoth("Client got str message: " + sm.str);
             }
             sm = clientMsgMan.popMessage<StringMessage>();
+        }
+
+        PingMessage pm = clientMsgMan.popMessage<PingMessage>();
+        while (pm != null)
+        {
+            lastPingDiff = Time.time - pm.timeSent;
+            pingDisplay.text = "Ping: " + Mathf.RoundToInt(lastPingDiff * 1000);
+            pm = clientMsgMan.popMessage<PingMessage>();
         }
 
         PrivatePlayerInfo pi = clientMsgMan.popMessage<PrivatePlayerInfo>();
@@ -283,7 +304,9 @@ public class Client : MonoBehaviour
 
     public void startClient()
     {
-        ws = WebSocketFactory.CreateInstance("ws://localhost:7268"); // NOTE FOR SOME INSANO REASON 127.0.0.1 wont work but localhost will with hybridsocket
+        string connectionTo = $"ws://{(useLocal ? Constants.localServer : Constants.remoteServer)}:{Constants.port}";
+        NetDebug.printBoth($"Connection to: {connectionTo}");
+        ws = WebSocketFactory.CreateInstance(connectionTo); // NOTE FOR SOME INSANO REASON 127.0.0.1 wont work but localhost will with hybridsocket
 
         //UserInput testInp = new UserInput();
         //testInp.x = 1;

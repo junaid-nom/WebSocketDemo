@@ -24,6 +24,10 @@ public delegate T best<T>(T a, T b);
 
 public class Constants : MonoBehaviour
 {
+    public const int port = 7270;
+    public const string remoteServer = "db.mindgamemagicka.com"; // 3.209.19.120 or db.mindgamemagicka.com
+    public const string localServer = "localhost";
+
     public const float charMoveSpeed = 10;
     public const float startHP = 100;
     public const int baseScore = 100;

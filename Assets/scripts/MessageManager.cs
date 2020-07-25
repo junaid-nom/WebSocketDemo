@@ -232,6 +232,17 @@ public class DeleteMessage : Message
     }
 }
 
+[Serializable]
+public class PingMessage : Message
+{
+    public float timeSent;
+    
+    public PingMessage(float timeSent)
+    {
+        this.timeSent = timeSent;
+    }
+}
+
 // meant to hold msgs that will be READ not sent
 public class MessageManager
 {

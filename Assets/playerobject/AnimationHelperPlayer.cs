@@ -24,7 +24,6 @@ public class AnimationHelperPlayer : MonoBehaviour
         var weapon = player.getActiveWeapon();
         if (weapon != null)
         {
-            Debug.Log("active weapon:" + weapon.name);
             weapon.setDamage(damage);
         }
     }

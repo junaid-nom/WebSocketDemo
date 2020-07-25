@@ -147,7 +147,11 @@ public class Server : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-         
+#if UNITY_EDITOR
+        Debug.Log("Unity Editor");
+#elif UNITY_STANDALONE_LINUX
+        autoStartServer = true;
+#endif
         if (autoStartServer)
         {
             startServer();
@@ -275,24 +279,32 @@ public class Server : MonoBehaviour
 
     void transferNewMessage(GotMessage gm)
     {
-        if (gm.uid == null)
+        // handle pings simply by replying
+        if (gm.m.GetType() == typeof(PingMessage))
         {
-            if (gm.m != null)
-                Debug.LogWarning("Got null conn id msg: " + gm.m.GetType());
-            else
+            sendToSpecificUser(gm.uid, gm.m);
+        }
+        else
+        {
+            if (gm.uid == null)
             {
-                Debug.LogWarning("Got null conn id msg: " + gm.m);
+                if (gm.m != null)
+                    Debug.LogWarning("Got null conn id msg: " + gm.m.GetType());
+                else
+                {
+                    Debug.LogWarning("Got null conn id msg: " + gm.m);
+                }
+                return;
             }
-            return;
+            UserManager um = getUserManager(gm.uid);
+
+            if (um == null)
+            {
+                addUserManager(gm.uid);
+                um = Server.getUserManager(gm.uid);
+            }
+            um.addMessage(gm.m);
         }
-        UserManager um = getUserManager(gm.uid);
-        
-        if (um == null)
-        {
-            addUserManager(gm.uid);
-            um = Server.getUserManager(gm.uid);
-        }
-        um.addMessage(gm.m);
     }
 
     public static void sendToSpecificUser(string uid, Message m)
@@ -369,8 +381,8 @@ public class Server : MonoBehaviour
     {
         isOn = true;
         System.Console.SetOut(new DebugLogWriter());
-        NetDebug.printBoth("about to start wssv ");
-        wssv = new WebSocketServer("ws://127.0.0.1:7268");
+        NetDebug.printBoth("about to start wssv at " + Constants.port);
+        wssv = new WebSocketServer(Constants.port); // NEED to just use this format of just putting port or it wont work properly with remote server
         wssv.AddWebSocketService<StoreMessages>("/");
 
         NetDebug.printBoth("starting wssv ");
