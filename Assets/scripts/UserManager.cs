@@ -120,7 +120,6 @@ public class UserManager : MonoBehaviour
         {
             deleteSelf();
         }
-        
     }
 
     // Use LateUpdate so Server has a chance to process all the message that came in this frame
@@ -149,6 +148,7 @@ public class UserManager : MonoBehaviour
     // TODO: Call if player DCED for greater than X time.
     void deleteSelf(/*Server server*/)
     {
+        Debug.Log("Closing uid:" + usernet.uid);
         // remove from server List of UserManagers
         Server.removeUserManager(usernet.uid);
         // Destroy any related objects like playerCharacter

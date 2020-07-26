@@ -184,10 +184,6 @@ public class InputToMovement : MonoBehaviour
         }
         else
         {
-            if (!uid.Contains("BOT"))
-            {
-                Debug.Log("wtf got empty state " + animator.GetCurrentAnimatorClipInfo(0)[0].clip.name);
-            }
             cp.anim_state = null;
             cp.normalizedTime = -1;
         }

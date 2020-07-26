@@ -2387,7 +2387,7 @@ MonoBehaviour:
   pickslot2: {fileID: 1863873372}
   lifesteal: {fileID: 959431058}
   pingDisplay: {fileID: 1488254951}
-  useLocal: 0
+  useLocal: 1
 --- !u!4 &1578504052
 Transform:
   m_ObjectHideFlags: 0

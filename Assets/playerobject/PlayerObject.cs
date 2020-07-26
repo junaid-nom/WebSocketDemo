@@ -82,7 +82,6 @@ public class PlayerObject : MonoBehaviour
     {
         if (Server.isOn)
         {
-            Debug.Log("Got equiped:" + equipedSlot1);
             if (privateInfo.slot2 == WeaponType.none)
             {
                 privateInfo.slot2 = w;

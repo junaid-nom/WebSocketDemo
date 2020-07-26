@@ -40,13 +40,25 @@ public class StoreMessages : WebSocketBehavior
         //NetDebug.printBoth("Server Got msg " + e.Data + " Raw " + Encoding.UTF8.GetString(e.RawData));
 
         //Send(e.Data + " t: " + System.DateTime.Now.ToString("h:mm:ss tt"));
-        Message deser = (Message)BinarySerializer.Deserialize(e.RawData);
-        if (deser == null)
+        
+        // TODO: Add try catch here in case its not a serializable msg
+        try
         {
-            Debug.LogWarning("Got null msg????" + deser + " raw: " + e.RawData);
+            Message deser = (Message)BinarySerializer.Deserialize(e.RawData);
+            if (deser == null)
+            {
+                Debug.LogWarning("Got null msg????" + deser + " raw: " + e.RawData);
+            }
+            else
+            {
+                newMsgs.Add(new GotMessage(ID, deser));
+            }
         }
-        newMsgs.Add(new GotMessage(ID, deser));
-
+        catch (System.Runtime.Serialization.SerializationException ex)
+        {
+            Debug.Log("Couldnt serialize msg:" + e.RawData);
+        }
+        
         /*
         Send(BinarySerializer.Serialize(new StringMessage(" Server got your msgtype: " + deser.msgType)));
         NetDebug.printBoth("Server got msg type: " + deser.msgType);
@@ -223,7 +235,13 @@ public class Server : MonoBehaviour
             // Send all messages out at once in a big list
             foreach (var msgs in uidToMessageQueue)
             {
-                wssv.WebSocketServices["/"].Sessions.SendTo(BinarySerializer.Serialize(new ListMessage(msgs.Value)), msgs.Key);
+                try
+                {
+                    wssv.WebSocketServices["/"].Sessions.SendTo(BinarySerializer.Serialize(new ListMessage(msgs.Value)), msgs.Key);
+                } catch (System.InvalidOperationException)
+                {
+                    Debug.Log("Couldnt send msg probably dced player");
+                }
                 msgs.Value.Clear();
             }
             wssv.WebSocketServices["/"].Sessions.Broadcast(BinarySerializer.Serialize(new ListMessage(broadcastMessageQueue)));
@@ -247,7 +265,6 @@ public class Server : MonoBehaviour
             {
                 item.quantity -= 1;
 
-                Debug.Log("Picked up type:" + item.itemInfo.GetType());
                 // actually process the item:
                 if (item.itemInfo.GetType() == typeof(HealthItem))
                 {
@@ -257,7 +274,6 @@ public class Server : MonoBehaviour
                 }
                 if (Constants.IsSameOrSubclass(typeof(WeaponItem), item.itemInfo.GetType()))
                 {
-                    Debug.Log("Picked up weapon:" + item.itemInfo.GetType());
                     var weapon = (WeaponItem)item.itemInfo;
                     player.pickUpWeapon(weapon.weapon, uidToUserM[player.uid].equipedSlot1);
                 }
@@ -275,12 +291,13 @@ public class Server : MonoBehaviour
     public static void removeUserManager(string uid)
     {
         uidToUserM.Remove(uid);
+        uidToMessageQueue.Remove(uid);
     }
 
     void transferNewMessage(GotMessage gm)
     {
         // handle pings simply by replying
-        if (gm.m.GetType() == typeof(PingMessage))
+        if (gm.m != null && gm.m.GetType() == typeof(PingMessage))
         {
             sendToSpecificUser(gm.uid, gm.m);
         }

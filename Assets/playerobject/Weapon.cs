@@ -54,7 +54,6 @@ public class Weapon : MonoBehaviour
                 // life steal
                 float lifeGained = Constants.scoreToLifesteal(myp.score) * damageDone;
                 myp.health.changeHealth(lifeGained);
-                NetDebug.printBoth("Got life: " + lifeGained);
 
                 // Update score
                 int scoreEffective = (otherP.score + Constants.baseScore);
