@@ -130,7 +130,7 @@ public class InputToMovement : MonoBehaviour
         return Quaternion.Euler(0, Quaternion.LookRotation((directionTo).normalized).eulerAngles.y, 0);
     }
 
-    public static CopyMovement inputToMovement(UserInput inp, Vector3 oldPositionLocal, Quaternion oldRotationLocal, float speed, Animator animator, string canChangeState, List<string> stateNames, string uid, float health, WeaponType weapon, int score)
+    public static CopyMovement inputToMovement(UserInput inp, Vector3 oldPositionLocal, Quaternion oldRotationLocal, float speed, Animator animator, string canChangeState, List<string> stateNames, string uid, float health, WeaponType weapon, int score, string playerName)
     {
         CopyMovement cp = new CopyMovement();
         // Have to use IsName because you can't check animation state directly. Though you can check animation clip I didn't here.
@@ -192,6 +192,7 @@ public class InputToMovement : MonoBehaviour
 
         cp.health = health;
         cp.score = score;
+        cp.playerName = playerName;
         return cp;
     }
 

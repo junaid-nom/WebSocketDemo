@@ -98,12 +98,13 @@ public class CopyMovement : Message
     public float health; // TODO THIS IS UNUSED NEED TO ACTUALLY DO STUFF! add Health component to copyFromtStruct. Also need to change inputToMovement function
     public int score;
     public WeaponType weapon;
+    public string playerName;
 
     public CopyMovement()
     {
     }
 
-    public CopyMovement(NetworkObjectInfo objectInfo, SerializableVector3 localPosition, SerializableQuaternion localRotation, string anim_state, float normalizedTime, bool ignoreRotation, float health, WeaponType weapon, int score)
+    public CopyMovement(NetworkObjectInfo objectInfo, SerializableVector3 localPosition, SerializableQuaternion localRotation, string anim_state, float normalizedTime, bool ignoreRotation, float health, WeaponType weapon, int score, string playerName)
     {
         this.objectInfo = objectInfo;
         this.localPosition = localPosition;
@@ -114,12 +115,13 @@ public class CopyMovement : Message
         this.health = health;
         this.weapon = weapon;
         this.score = score;
+        this.playerName = playerName;
     }
 
     public override string ToString()
     {
         return "loc:" + localPosition.ToString() + " rot: " + localRotation.ToString() + " anim: " + anim_state + " ntime: " + normalizedTime
-        + " ignoreRot: " + ignoreRotation + " health: " + health + " weapon:" + weapon + " scoore:" + score;
+        + " ignoreRot: " + ignoreRotation + " health: " + health + " weapon:" + weapon + " scoore:" + score + " playerName:" + playerName;
         ;
     }
 }
@@ -178,6 +180,19 @@ public class StringMessage : Message
     {
         //msgType = 3;
         str = toSend;
+    }
+}
+
+[Serializable]
+public class NameSetMessage : Message
+{
+    public string name;
+    public NameSetMessage()
+    {
+    }
+    public NameSetMessage(string name)
+    {
+        this.name = name;
     }
 }
 

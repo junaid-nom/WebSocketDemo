@@ -6,6 +6,7 @@ public class UIController : MonoBehaviour
 {
     public GameObject serverButton;
     public GameObject clientButton;
+    public GameObject clientNameInput;
 
     // Start is called before the first frame update
     void Start()
@@ -23,5 +24,6 @@ public class UIController : MonoBehaviour
     {
         serverButton.SetActive(!serverButton.activeSelf);
         clientButton.SetActive(!clientButton.activeSelf);
+        clientNameInput.SetActive(!clientNameInput.activeSelf);
     }
 }

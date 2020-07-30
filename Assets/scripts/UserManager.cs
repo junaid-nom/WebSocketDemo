@@ -27,6 +27,7 @@ public class UserManager : MonoBehaviour
     public string currentConnID;
     bool closed = false;
     public bool equipedSlot1 = true;
+    public string playerName = "-";
 
     // Start is called before the first frame update
     void Start()
@@ -68,6 +69,7 @@ public class UserManager : MonoBehaviour
         playerHealth = playerCharacter.GetComponent<Health>();
         playerCharacter.name = "P-" + usernet.uid;
         playerObject.uid = usernet.uid;
+        playerObject.playerName = playerName;
         playerObject.isClientObject = false;
     }
 
@@ -87,7 +89,7 @@ public class UserManager : MonoBehaviour
 
         equipedSlot1 = finalui.equipedSlot1;
 
-        CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth(), playerObject.getEquipedWeapon(equipedSlot1), playerObject.score);
+        CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth(), playerObject.getEquipedWeapon(equipedSlot1), playerObject.score, playerName);
         playerCopyController.setMovement(cp);
 
         if (playerObject.dead && finalui.buttonsDown.Count>=5 &&  finalui.buttonsDown[4])
@@ -121,6 +123,15 @@ public class UserManager : MonoBehaviour
             deleteSelf();
         }
     }
+    
+    void processNameMessage()
+    {
+        List<NameSetMessage> userInps = usernet.msgMan.popAllMessages<NameSetMessage>();
+        if (userInps != null)
+        {
+            playerName = userInps[userInps.Count - 1].name;
+        }
+    }
 
     // Use LateUpdate so Server has a chance to process all the message that came in this frame
     public void customUpdate()
@@ -130,6 +141,7 @@ public class UserManager : MonoBehaviour
         {
             processOpenMessage();
             processUserInputs();
+            processNameMessage();
 
             // Send info about self to Server to broadcast
 

@@ -189,6 +189,11 @@ public class Server : MonoBehaviour
                     }
                 } else
                 {
+                    if (bot.aiList == null)
+                    {
+                        // Bot is just starting up. So set its name
+                        StoreMessages.newMsgs.Add(new GotMessage(bot.state.uid, new NameSetMessage(bot.state.playerName)));
+                    }
                     System.Tuple<AIPriorityList, AIMemory> result = bot.ai(bot.aiList, bot.state);
                     bot.state.extraState = result.Item2;
                     UserInput uinp = Bots.getBotAction(result.Item1, bot.state);
@@ -205,6 +210,7 @@ public class Server : MonoBehaviour
                     }
 
                     // clear msgs because guaranteed to get a fresh state because this runs at the same time as a "server tick"
+                    // msgs is the NEW MESSAGES this tick.
                     bot.state.msgs.Clear();
                 }
             }
@@ -247,7 +253,6 @@ public class Server : MonoBehaviour
             wssv.WebSocketServices["/"].Sessions.Broadcast(BinarySerializer.Serialize(new ListMessage(broadcastMessageQueue)));
             broadcastMessageQueue.Clear();
         }
-        
     }
 
     private void FixedUpdate()

@@ -83,6 +83,8 @@ public class Client : MonoBehaviour
     float lastPingDiff = 0;
     public TextMeshProUGUI pingDisplay;
 
+    public Text nameInput;
+
     public bool useLocal;
 
     // Start is called before the first frame update
@@ -268,7 +270,6 @@ public class Client : MonoBehaviour
             objIDToObject[k].timeSinceHeartbeat = System.DateTime.Now;
         } else
         {
-            // :
             // create new game object of type blah
             GameObject ng = Instantiate(Constants.playerCharacterPrefab);
             var po = ng.GetComponent<PlayerObject>();
@@ -279,6 +280,8 @@ public class Client : MonoBehaviour
             Debug.Log("Adding obj k:" + k);
             // add dictionary entry
             objIDToObject.Add(k, new NetworkObjectClient(ng, cp.objectInfo, System.DateTime.Now));
+            objIDToObject[k].gameObject.GetComponent<copyFromStruct>().setMovement(cp); // TODO: make this a list of copyFromStruct instead of game object so its faster
+            objIDToObject[k].timeSinceHeartbeat = System.DateTime.Now;
         }
     }
 
@@ -327,9 +330,8 @@ public class Client : MonoBehaviour
         };
         ws.OnOpen += () =>
         {
-            //NetDebug.printBoth("Client sending string msg then userinput");
-            //ws.Send(BinarySerializer.Serialize(new StringMessage("ClientOpenTest")));
-            //ws.Send(BinarySerializer.Serialize(testInp));
+            NameSetMessage newName = new NameSetMessage(nameInput.text.Substring(0, Mathf.Min(nameInput.text.Length, 15)));
+            ws.Send(BinarySerializer.Serialize(newName));  
         };
         ws.OnError += (string errMsg) => NetDebug.printBoth("got on error " + errMsg);
         ws.OnClose += (WebSocketCloseCode code) => NetDebug.printBoth("got on close " + code);

@@ -13,6 +13,7 @@ public class PlayerObject : MonoBehaviour
     public string uid;
     public int score = Constants.startScore;
     public bool isClientObject = false;
+    public string playerName;
 
     // auto set
     Animator animator;
