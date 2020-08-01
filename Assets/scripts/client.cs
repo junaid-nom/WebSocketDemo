@@ -217,7 +217,7 @@ public class Client : MonoBehaviour
             if (i < Constants.maxScoreBoardRank)
             {
                 scoreString += line;
-            } else
+            } else if (scoreList[i].objectInfo.uid == myUID)
             {
                 myScore += line;
             }

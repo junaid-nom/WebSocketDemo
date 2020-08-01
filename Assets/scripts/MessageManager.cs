@@ -43,6 +43,10 @@ public class HealthItem : ItemInfo
     {
         this.healthBonus = healthBonus;
     }
+    public HealthItem()
+    {
+        this.healthBonus = Constants.healthItemPickUpAmount;
+    }
 }
 [Serializable]
 public abstract class WeaponItem : ItemInfo

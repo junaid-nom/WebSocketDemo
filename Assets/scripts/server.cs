@@ -215,6 +215,33 @@ public class Server : MonoBehaviour
                 }
             }
 
+            // Add Items
+            // First count each item type
+            Dictionary<System.Type, int> currentItems = new Dictionary<System.Type, int>();
+            foreach(var itemT in Constants.worldItemTypes)
+            {
+                currentItems[itemT] = 0;
+            }
+            foreach (var item in objToItems.Values)
+            {
+                System.Type t = item.itemInfo.GetType();
+                if (currentItems.ContainsKey(t))
+                {
+                    currentItems[t] += 1;
+                }
+            }
+            // Now for each type, get the number of more to spawn and spawn them
+            int numItems = (int)(Mathf.Max(wssv.WebSocketServices["/"].Sessions.Count, Constants.maxBots) * Constants.itemToPlayerRatio);
+            foreach(var itemType in currentItems.Keys)
+            {
+                int toSpawn = numItems - currentItems[itemType];
+                for (int i = 0; i < toSpawn; i++)
+                {
+                    // TODO: Maybe put 3 health items on top of each other?
+                    spawnItem(itemType, 1);
+                }
+            }
+
             // Use while loop and remove 1 at a time so that its more thread safe.
             // If you clear whole list, maybe a message was added right before you cleared.
             while (StoreMessages.newMsgs.Count > 0)
@@ -428,32 +455,64 @@ public class Server : MonoBehaviour
 
         // TODO initialize items, eventually should spawn them periodically somewhere in the update method?
         {
-            System.Action addHealth = () =>
-            {
-                var loc = getSpawnLocation();
-                var he1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(HealthItem)]);
-                he1.transform.position = loc;
-                WorldItem h1 = new WorldItem(new NetworkObjectInfo(he1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new HealthItem(5), loc, he1.transform.localRotation, 1);
+            //System.Action addHealth = () =>
+            //{
+            //    var loc = getSpawnLocation();
+            //    var he1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(HealthItem)]);
+            //    he1.transform.position = loc;
+            //    WorldItem h1 = new WorldItem(new NetworkObjectInfo(he1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new HealthItem(5), loc, he1.transform.localRotation, 1);
                 
-                objToItems.Add(h1.objectInfo.objectID, h1);
-            };
+            //    objToItems.Add(h1.objectInfo.objectID, h1);
+            //};
 
-            System.Action addSpear = () =>
-            {
-                var loc = getSpawnLocation();
-                var w1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(SpearItem)]);
-                w1.transform.position = loc;
-                w1.transform.Rotate(new Vector3(0, 1, 0), Random.Range(0, 360));
-                WorldItem wi1 = new WorldItem(new NetworkObjectInfo(w1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new SpearItem(), loc, w1.transform.localRotation, 1);
+            //System.Action addSpear = () =>
+            //{
+            //    var loc = getSpawnLocation();
+            //    var w1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(SpearItem)]);
+            //    w1.transform.position = loc;
+            //    w1.transform.Rotate(new Vector3(0, 1, 0), Random.Range(0, 360));
+            //    WorldItem wi1 = new WorldItem(new NetworkObjectInfo(w1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new SpearItem(), loc, w1.transform.localRotation, 1);
 
-                objToItems.Add(wi1.objectInfo.objectID, wi1);
-            };
-            for (int i = 0; i< 5; i++)
+            //    objToItems.Add(wi1.objectInfo.objectID, wi1);
+            //};
+            for (int i = 0; i< 1; i++)
             {
-                addHealth();
-                addSpear();
+                spawnItem(typeof(HealthItem), 1);
+                spawnItem(typeof(SpearItem), 1);
             }
         }
+    }
+
+    //void addHealth()
+    //{
+    //    var loc = getSpawnLocation();
+    //    var he1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(HealthItem)]);
+    //    he1.transform.position = loc;
+    //    WorldItem h1 = new WorldItem(new NetworkObjectInfo(he1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new HealthItem(5), loc, he1.transform.localRotation, 1);
+
+    //    objToItems.Add(h1.objectInfo.objectID, h1);
+    //}
+
+    //void addSpear()
+    //{
+    //    var loc = getSpawnLocation();
+    //    var w1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(SpearItem)]);
+    //    w1.transform.position = loc;
+    //    w1.transform.Rotate(new Vector3(0, 1, 0), Random.Range(0, 360));
+    //    WorldItem wi1 = new WorldItem(new NetworkObjectInfo(w1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new SpearItem(), loc, w1.transform.localRotation, 1);
+
+    //    objToItems.Add(wi1.objectInfo.objectID, wi1);
+    //}
+
+    void spawnItem(System.Type t, int quantityInOneSpot)
+    {
+        var loc = getSpawnLocation();
+        var w1 = Instantiate<GameObject>(Constants.prefabsFromType[t]);
+        w1.transform.position = loc;
+        w1.transform.Rotate(new Vector3(0, 1, 0), Random.Range(0, 360));
+        WorldItem wi1 = new WorldItem(new NetworkObjectInfo(w1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), (ItemInfo)System.Activator.CreateInstance(t), loc, w1.transform.localRotation, 1);
+
+        objToItems.Add(wi1.objectInfo.objectID, wi1);
     }
 
     void closeStuff()

@@ -58,7 +58,11 @@ public class Constants : MonoBehaviour
     public const float timeNeededToCounterAttack = .1f;
 
     public static GameObject playerCharacterPrefab;
-    public static Dictionary<System.Type, GameObject> prefabsFromType = new Dictionary<System.Type, GameObject>(); 
+    public static Dictionary<System.Type, GameObject> prefabsFromType = new Dictionary<System.Type, GameObject>();
+
+    public static List<System.Type> worldItemTypes = new List<System.Type>() { typeof(HealthItem), typeof(SpearItem) };
+    public const int healthItemPickUpAmount = 15;
+    public const float itemToPlayerRatio = .8f;
 
     public const int secondsBeforeDestroyNetworkObject = 10;
     public const float playerWidth = .5f;
