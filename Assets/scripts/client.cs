@@ -84,6 +84,8 @@ public class Client : MonoBehaviour
     public TextMeshProUGUI pingDisplay;
 
     public Text nameInput;
+    public List<CopyMovement> scoreList = new List<CopyMovement>();
+    public TextMeshProUGUI scoreBoardDisplay;
 
     public bool useLocal;
 
@@ -138,6 +140,7 @@ public class Client : MonoBehaviour
             pi = clientMsgMan.popMessage<PrivatePlayerInfo>();
         }
 
+        scoreList.Clear();
         CopyMovement cp = clientMsgMan.popMessage<CopyMovement>();
         while (cp != null)
         {
@@ -189,6 +192,43 @@ public class Client : MonoBehaviour
 
         toDelete.ForEach(deleteNetObject);
         toDelete.Clear();
+    }
+
+    void LateUpdate()
+    {
+        scoreList.Sort((s1, s2) =>
+        {
+            if (s1.score == s2.score) return 0;
+            if (s1.score < s2.score) return 1;
+            if (s1.score > s2.score) return -1;
+            return 0;
+        });
+
+        string scoreString = "";
+        string myScore = null;
+        for(int i = 0; i < scoreList.Count; i++)
+        {
+            string line = "";
+            if (scoreList[i].objectInfo.uid == myUID)
+            {
+                line += "> ";
+            }
+            line += $"{i + 1} {scoreList[i].playerName}: {scoreList[i].score} \n";
+            if (i < Constants.maxScoreBoardRank)
+            {
+                scoreString += line;
+            } else
+            {
+                myScore += line;
+            }
+        }
+        if (myScore != null)
+        {
+            scoreString += "\n";
+            scoreString += myScore;
+        }
+
+        scoreBoardDisplay.text = scoreString;
     }
 
     public void setPrivateUI(PrivatePlayerInfo pi)
@@ -245,6 +285,7 @@ public class Client : MonoBehaviour
 
     public void processCopyMovement(CopyMovement cp)
     {
+        scoreList.Add(cp);
         string k = cp.objectInfo.objectID;
         if (cp.objectInfo.uid == myUID)
         {
@@ -330,7 +371,7 @@ public class Client : MonoBehaviour
         };
         ws.OnOpen += () =>
         {
-            NameSetMessage newName = new NameSetMessage(nameInput.text.Substring(0, Mathf.Min(nameInput.text.Length, 15)));
+            NameSetMessage newName = new NameSetMessage(nameInput.text.Substring(0, Mathf.Min(nameInput.text.Length, Constants.maxNameLength)));
             ws.Send(BinarySerializer.Serialize(newName));  
         };
         ws.OnError += (string errMsg) => NetDebug.printBoth("got on error " + errMsg);

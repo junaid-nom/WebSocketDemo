@@ -28,6 +28,9 @@ public class Constants : MonoBehaviour
     public const string remoteServer = "db.mindgamemagicka.com"; // 3.209.19.120 or db.mindgamemagicka.com
     public const string localServer = "localhost";
 
+    public const int maxNameLength = 15;
+    public const int maxScoreBoardRank = 2;
+
     public const float charMoveSpeed = 10;
     public const float startHP = 100;
     public const int baseScore = 100;
