@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum WeaponType
 {
-    none, sword, spear
+    none, sword, spear, greatsword
 }
 
 public class PlayerObject : MonoBehaviour
@@ -24,6 +24,7 @@ public class PlayerObject : MonoBehaviour
     public GameObject hitbox;
     public GameObject sword;
     public GameObject spear;
+    public GameObject greatsword;
 
     // Server private only:
     public PrivatePlayerInfo privateInfo = new PrivatePlayerInfo(WeaponType.sword, WeaponType.none);
@@ -42,8 +43,8 @@ public class PlayerObject : MonoBehaviour
 
     private void startup()
     {
-        weaponObjects = new List<GameObject>() { sword, spear };
-        weapons = new List<Weapon>() { sword.GetComponentInChildren<Weapon>(), spear.GetComponentInChildren<Weapon>() };
+        weaponObjects = new List<GameObject>() { sword, spear, greatsword };
+        weapons = new List<Weapon>() { sword.GetComponentInChildren<Weapon>(), spear.GetComponentInChildren<Weapon>(), greatsword.GetComponentInChildren<Weapon>() };
         animator = GetComponent<Animator>();
         health = GetComponent<Health>();
         score = Constants.startScore;
@@ -58,7 +59,9 @@ public class PlayerObject : MonoBehaviour
                 //break;
             case WeaponType.spear:
                 return spear;
-                //break;
+            //break;
+            case WeaponType.greatsword:
+                return greatsword;
             default:
                 throw new KeyNotFoundException();
                 //return null; // should never happen

@@ -52,6 +52,8 @@ public class Constants : MonoBehaviour
     public RuntimeAnimatorController _spear_animator;
     public static RuntimeAnimatorController sword_animator;
     public RuntimeAnimatorController _sword_animator;
+    public static RuntimeAnimatorController greatsword_animator;
+    public RuntimeAnimatorController _greatsword_animator;
 
     public static readonly Dictionary<WeaponType, RuntimeAnimatorController> weaponToAnimator = new Dictionary<WeaponType, RuntimeAnimatorController>();
 
@@ -60,9 +62,9 @@ public class Constants : MonoBehaviour
     public static GameObject playerCharacterPrefab;
     public static Dictionary<System.Type, GameObject> prefabsFromType = new Dictionary<System.Type, GameObject>();
 
-    public static List<System.Type> worldItemTypes = new List<System.Type>() { typeof(HealthItem), typeof(SpearItem) };
+    public static List<System.Type> worldItemTypes = new List<System.Type>() { typeof(HealthItem), typeof(SpearItem), typeof(GreatSwordItem) };
     public const int healthItemPickUpAmount = 15;
-    public const float itemToPlayerRatio = .8f;
+    public const float itemToPlayerRatio = .5f; // TODO: This is kinda dumb right now, ideally it should count weapons being help by players as well!
 
     public const int secondsBeforeDestroyNetworkObject = 10;
     public const float playerWidth = .5f;
@@ -83,14 +85,17 @@ public class Constants : MonoBehaviour
 
         prefabsFromType.Add(typeof(HealthItem), Resources.Load<GameObject>("HealthPickUp"));
         prefabsFromType.Add(typeof(SpearItem), Resources.Load<GameObject>("SpearPickUp"));
+        prefabsFromType.Add(typeof(GreatSwordItem), Resources.Load<GameObject>("GreatSwordPickUp"));
 
         blockMovementMask = LayerMask.GetMask(new string[] { "wall", "player" });
         attackAnimationInfo = _attackAnimationInfo;
         spear_animator = _spear_animator;
         sword_animator = _sword_animator;
+        greatsword_animator = _greatsword_animator;
 
         weaponToAnimator.Add(WeaponType.sword, sword_animator);
         weaponToAnimator.Add(WeaponType.spear, spear_animator);
+        weaponToAnimator.Add(WeaponType.greatsword, greatsword_animator);
     }
 
     public static int blockMovementMask;

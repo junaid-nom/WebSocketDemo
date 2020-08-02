@@ -16,6 +16,46 @@ using AIPriorityList = System.Collections.Generic.List<System.Tuple<System.Colle
 // - Life steal % gained per kill up to 50% or something. Incentive to get "bigger" like in slither.io. People love getting stronger.
 // - Maybe Your score also influences your basic movement speed (up to a max)?
 
+/* GUIDES:
+How to Add a new Weapon:
+First How To Add Any World Item:
+- Add a pickup item. Can be any model, just add a trigger collider, and the script "PickUp". ALSO CHANGE LAYER TO "wall"
+- Add WeaponType enum
+- Add WeaponItem subclass
+- Add to Constants.prefabsFromType
+- Add to Constants.worldItemTypes
+- Add case in tryPickUpItem. For weapon just add to PlayerObject.pickUpWeapon
+
+How to add weapon to PlayerObject
+- Add game object for the weapon (public and linked in inspector)
+- Add to weaponObjects and weapons
+- Add case in weaponTypeToWeapon
+
+How to add in actual controlledPlayer prefab
+- First add an empty gameobject we will call "parent"
+- Then nest inside of that empty game object, with actual model of the weapon and "hitbox"
+  - Move the model around so that the parent is in a location that makes sense as the weapons "handle" so that rotations and animations are easier
+  - SET hitbox OBJECT TO LAYER: weapon!
+- Add a box collider and a weapon script to the inner hitbox
+- move it to its default walking around location
+- attach the parent game object to the PlayerObject script.
+
+Now create animations for the weapon
+- create a new "override controller" for the weapon
+- copy all the animations from default weapon into new files. I believe they must have same name as original animation clips!
+- attach the override controller to the original weapon controller (controllerPlayerAnimator) in inspector for the file
+  - attach all the copied animations to this new weapon controller in inspector for the file
+- then override the new copys of the aniamtions one by one until the weapon is complete
+  - To mess with the animations goto a instance of controlledPlayer, and change its animation controller to the new one and edit animations normally
+  - move around the new weapon game object at its parent otherwise shit can get weird
+- Actually add the override controller to Constants.weaponToAnimator. Will need to link it via inspector and make a static copy like the others.
+  - Link it in the inspector too in the Server object
+
+Bot helping:
+- add the weapon animations to Constants.attackAnimationInfo so that bots can understand the timing of diff weapons
+- TODO: actually have the AnimationInfo script have code to handle different weapons somehow (need to know enemies current weapon? or just use the animation clip thats playing on the enemy object?)
+*/
+
 public struct GotMessage
 {
     public string uid;
@@ -479,6 +519,7 @@ public class Server : MonoBehaviour
             {
                 spawnItem(typeof(HealthItem), 1);
                 spawnItem(typeof(SpearItem), 1);
+                spawnItem(typeof(GreatSwordItem), 1);
             }
         }
     }

@@ -67,6 +67,15 @@ public class SpearItem : WeaponItem
     }
 }
 [Serializable]
+public class GreatSwordItem : WeaponItem
+{
+    public GreatSwordItem()
+    {
+        weapon = WeaponType.greatsword;
+    }
+}
+
+[Serializable]
 public class WorldItem : Message
 {
     public NetworkObjectInfo objectInfo;
