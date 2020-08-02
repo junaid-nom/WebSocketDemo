@@ -161,6 +161,7 @@ public class UserManager : MonoBehaviour
     void deleteSelf(/*Server server*/)
     {
         Debug.Log("Closing uid:" + usernet.uid);
+        playerObject.die();
         // remove from server List of UserManagers
         Server.removeUserManager(usernet.uid);
         // Destroy any related objects like playerCharacter
