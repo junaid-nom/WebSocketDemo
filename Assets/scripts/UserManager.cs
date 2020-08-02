@@ -21,7 +21,7 @@ public class UserManager : MonoBehaviour
     copyFromStruct playerCopyController;
     Animator playerAnimator;
     Health playerHealth;
-    PlayerObject playerObject;
+    public PlayerObject playerObject;
     private bool startUp;
     InputBuffer inputBuffer = new InputBuffer();
     public string currentConnID;

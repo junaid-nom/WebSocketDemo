@@ -67,7 +67,7 @@ public class Constants : MonoBehaviour
     public const float itemToPlayerRatio = .5f; // TODO: This is kinda dumb right now, ideally it should count weapons being help by players as well!
 
     public const int secondsBeforeDestroyNetworkObject = 10;
-    public const float playerWidth = .5f;
+    public const float playerWidth = .5f; // used for physics to check if wall in the way
 
     public static AnimationInfo attackAnimationInfo;
     public AnimationInfo _attackAnimationInfo; // set in inspector

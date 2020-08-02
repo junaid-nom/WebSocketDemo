@@ -24,6 +24,7 @@ First How To Add Any World Item:
 - Add WeaponItem subclass
 - Add to Constants.prefabsFromType
 - Add to Constants.worldItemTypes
+= Add case to Server.weaponTypeToItemType
 - Add case in tryPickUpItem. For weapon just add to PlayerObject.pickUpWeapon
 
 How to add weapon to PlayerObject
@@ -53,6 +54,7 @@ Now create animations for the weapon
 
 Bot helping:
 - add the weapon animations to Constants.attackAnimationInfo so that bots can understand the timing of diff weapons
+- add weaponinfo like Constants.swordInfo so they know enemy ranges and stuff
 - TODO: actually have the AnimationInfo script have code to handle different weapons somehow (need to know enemies current weapon? or just use the animation clip thats playing on the enemy object?)
 */
 
@@ -270,8 +272,28 @@ public class Server : MonoBehaviour
                     currentItems[t] += 1;
                 }
             }
+            // get items equiped by players
+            foreach(var um in uidToUserM.Values)
+            {
+                var po = um.playerObject;
+                if (po != null)
+                {
+                    var witype = weaponTypeToItemType(po.privateInfo.slot1);
+                    if (witype != null && currentItems.ContainsKey(witype))
+                    {
+                        currentItems[witype] += 1;
+                    }
+                    witype = weaponTypeToItemType(po.privateInfo.slot2);
+                    if (witype != null && currentItems.ContainsKey(witype))
+                    {
+                        currentItems[witype] += 1;
+                    }
+                }
+            }
+
             // Now for each type, get the number of more to spawn and spawn them
             int numItems = (int)(Mathf.Max(wssv.WebSocketServices["/"].Sessions.Count, Constants.maxBots) * Constants.itemToPlayerRatio);
+
             foreach(var itemType in currentItems.Keys)
             {
                 int toSpawn = numItems - currentItems[itemType];
@@ -545,15 +567,47 @@ public class Server : MonoBehaviour
     //    objToItems.Add(wi1.objectInfo.objectID, wi1);
     //}
 
-    void spawnItem(System.Type t, int quantityInOneSpot)
+    static void spawnItem(System.Type t, int quantityInOneSpot, Vector3 spawnLocation)
     {
-        var loc = getSpawnLocation();
+        
         var w1 = Instantiate<GameObject>(Constants.prefabsFromType[t]);
-        w1.transform.position = loc;
+        w1.transform.position = spawnLocation;
         w1.transform.Rotate(new Vector3(0, 1, 0), Random.Range(0, 360));
-        WorldItem wi1 = new WorldItem(new NetworkObjectInfo(w1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), (ItemInfo)System.Activator.CreateInstance(t), loc, w1.transform.localRotation, 1);
+        WorldItem wi1 = new WorldItem(new NetworkObjectInfo(w1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), (ItemInfo)System.Activator.CreateInstance(t), spawnLocation, w1.transform.localRotation, 1);
 
         objToItems.Add(wi1.objectInfo.objectID, wi1);
+    }
+
+    static void spawnItem(System.Type t, int quantityInOneSpot)
+    {
+        spawnItem(t, quantityInOneSpot, getSpawnLocation());
+    }
+
+    public static System.Type weaponTypeToItemType(WeaponType wt)
+    {
+        switch (wt)
+        {
+            case WeaponType.none:
+                return null;
+            case WeaponType.sword:
+                return null;
+            case WeaponType.spear:
+                return typeof(SpearItem);
+            case WeaponType.greatsword:
+                return typeof(GreatSwordItem);
+            default:
+                Debug.LogError("Got weapontype unknown! " + wt);
+                return null;
+        }
+    }
+    public static void dropWeaponAt(WeaponType wt, Vector3 spawnLocation)
+    {
+        spawnLocation.y = 0;
+        System.Type wtype = weaponTypeToItemType(wt);
+        if (wtype != null)
+        {
+            spawnItem(wtype, 1, spawnLocation);
+        }
     }
 
     void closeStuff()

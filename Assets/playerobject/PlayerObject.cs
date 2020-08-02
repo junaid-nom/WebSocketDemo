@@ -56,15 +56,12 @@ public class PlayerObject : MonoBehaviour
         {
             case WeaponType.sword:
                 return sword;
-                //break;
             case WeaponType.spear:
                 return spear;
-            //break;
             case WeaponType.greatsword:
                 return greatsword;
             default:
                 throw new KeyNotFoundException();
-                //return null; // should never happen
         }
     }
 
@@ -94,10 +91,12 @@ public class PlayerObject : MonoBehaviour
             {
                 if (equipedSlot1)
                 {
+                    Server.dropWeaponAt(privateInfo.slot1, transform.localPosition);
                     privateInfo.slot1 = w;
                 }
                 else
                 {
+                    Server.dropWeaponAt(privateInfo.slot2, transform.localPosition);
                     privateInfo.slot2 = w;
                 }
             }
@@ -130,7 +129,7 @@ public class PlayerObject : MonoBehaviour
 
     public void die()
     {
-        if (Server.isOn)
+        if (Server.isOn && !dead)
         {
             score = Constants.startScore;
             dead = true;
@@ -147,6 +146,16 @@ public class PlayerObject : MonoBehaviour
                     rb.isKinematic = true;
                 }
             }
+            // TODO: Not sure if they go back on when respawn?
+            foreach (var weap in weaponObjects)
+            {
+                weap.SetActive(false);
+            }
+
+            // drop picked up items
+            // function will handle case of none or sword
+            Server.dropWeaponAt(privateInfo.slot1, transform.localPosition);
+            Server.dropWeaponAt(privateInfo.slot2, transform.localPosition);
         }
     }
 
