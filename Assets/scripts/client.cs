@@ -87,6 +87,10 @@ public class Client : MonoBehaviour
     public List<CopyMovement> scoreList = new List<CopyMovement>();
     public TextMeshProUGUI scoreBoardDisplay;
 
+    public GameObject damagePopUp;
+    public GameObject getHurtPopUp;
+    public GameObject healPopUp;
+
     public bool useLocal;
 
     // Start is called before the first frame update
@@ -130,6 +134,13 @@ public class Client : MonoBehaviour
             lastPingDiff = Time.time - pm.timeSent;
             pingDisplay.text = "Ping: " + Mathf.RoundToInt(lastPingDiff * 1000);
             pm = clientMsgMan.popMessage<PingMessage>();
+        }
+
+        DamageDealtMessage ddm = clientMsgMan.popMessage<DamageDealtMessage>();
+        while (ddm != null)
+        {
+            createPopUp(ddm);
+            ddm = clientMsgMan.popMessage<DamageDealtMessage>();
         }
 
         PrivatePlayerInfo pi = clientMsgMan.popMessage<PrivatePlayerInfo>();
@@ -283,6 +294,23 @@ public class Client : MonoBehaviour
         objIDToObject.Remove(objID);
     }
 
+    void createPopUp(DamageDealtMessage dmg)
+    {
+        bool attacker = (myUID == dmg.uidAttacker);
+        var newObj = Instantiate(attacker ? damagePopUp : getHurtPopUp);
+        newObj.transform.position = dmg.damageLocation;
+        TextMeshPro textmesh = newObj.GetComponentInChildren<TextMeshPro>();
+        textmesh.text = $"{dmg.damage}";
+
+        if (attacker)
+        {
+            var newHeal = Instantiate(healPopUp);
+            newHeal.transform.position = dmg.healLocation;
+            TextMeshPro healtextmesh = newHeal.GetComponentInChildren<TextMeshPro>();
+            healtextmesh.text = $"{dmg.healthStolen}";
+        }
+    }
+
     public void processCopyMovement(CopyMovement cp)
     {
         scoreList.Add(cp);
@@ -381,7 +409,6 @@ public class Client : MonoBehaviour
         ws.Connect();
     }
     
-
     void closeStuff()
     {
         if (ws != null && (ws.GetState() == WebSocketState.Open || ws.GetState() == WebSocketState.Connecting))

@@ -62,6 +62,11 @@ public class Weapon : MonoBehaviour
                 {
                     myp.score += (int)(scoreEffective * Constants.damageScoreFactor);
                 }
+                var otherLoc = otherP.transform.localPosition;
+                otherLoc.y = 0;
+                DamageDealtMessage dm = new DamageDealtMessage((int)damageDone, (int)lifeGained, otherP.uid, myp.uid, otherLoc, myp.transform.localPosition);
+                Server.sendToSpecificUser(dm.uidAttacker, dm);
+                Server.sendToSpecificUser(dm.uidVictim, dm);
             }
             hitAlready.Add(hOther);
         }

@@ -104,7 +104,7 @@ public class UserManager : MonoBehaviour
         }
 
         Server.sendToAll(cp);
-        Server.sendToSpecificUser(currentConnID, playerObject.privateInfo);
+        Server.sendToSpecificUser(usernet.uid, playerObject.privateInfo);
     }
 
     void processOpenMessage()
@@ -112,7 +112,7 @@ public class UserManager : MonoBehaviour
         if (usernet.msgMan.popAllMessages<OpenMessage>() != null)
         {
             // Send to that player a message telling them their connection/userID
-            Server.sendToSpecificUser(currentConnID, new StringMessage("userid:" + currentConnID));
+            Server.sendToSpecificUser(usernet.uid, new StringMessage("userid:" + currentConnID));
         }
     }
 
