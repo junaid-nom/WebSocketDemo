@@ -45,7 +45,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    path: playerMass/weapon
+    path: playerMass/greatsword
   m_PositionCurves:
   - curve:
       serializedVersion: 2
@@ -62,7 +62,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    path: playerMass/weapon
+    path: playerMass/greatsword
   m_ScaleCurves: []
   m_FloatCurves: []
   m_PPtrCurves: []
@@ -74,7 +74,7 @@ AnimationClip:
   m_ClipBindingConstant:
     genericBindings:
     - serializedVersion: 2
-      path: 2120603740
+      path: 889910497
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -88,7 +88,7 @@ AnimationClip:
       customType: 4
       isPPtrCurve: 0
     - serializedVersion: 2
-      path: 2120603740
+      path: 889910497
       attribute: 4
       script: {fileID: 0}
       typeID: 4
@@ -189,7 +189,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalPosition.x
-    path: playerMass/weapon
+    path: playerMass/greatsword
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -208,7 +208,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalPosition.y
-    path: playerMass/weapon
+    path: playerMass/greatsword
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -227,7 +227,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalPosition.z
-    path: playerMass/weapon
+    path: playerMass/greatsword
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -246,7 +246,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.x
-    path: playerMass/weapon
+    path: playerMass/greatsword
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -265,7 +265,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.y
-    path: playerMass/weapon
+    path: playerMass/greatsword
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -284,7 +284,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.z
-    path: playerMass/weapon
+    path: playerMass/greatsword
     classID: 4
     script: {fileID: 0}
   m_EulerEditorCurves:
@@ -295,7 +295,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: playerMass/Capsule
+    path: playerMass/greatsword
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -305,7 +305,17 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: playerMass/Capsule
+    path: playerMass/greatsword
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: m_LocalEulerAngles.x
+    path: playerMass/greatsword
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -324,18 +334,8 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    attribute: m_LocalEulerAngles.x
-    path: playerMass/weapon
-    classID: 4
-    script: {fileID: 0}
-  - curve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: playerMass/weapon
+    path: playerMass/Capsule
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -345,7 +345,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: playerMass/weapon
+    path: playerMass/Capsule
     classID: 4
     script: {fileID: 0}
   m_HasGenericRootTransform: 0
