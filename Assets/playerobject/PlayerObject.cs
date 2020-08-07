@@ -140,11 +140,6 @@ public class PlayerObject : MonoBehaviour
             foreach (var gw in toDisable)
             {
                 gw.GetComponentInChildren<Collider>().enabled = false;
-                var rb = gw.GetComponentInChildren<Rigidbody>();
-                if (rb != null)
-                {
-                    rb.isKinematic = true;
-                }
             }
             // TODO: Not sure if they go back on when respawn?
             foreach (var weap in weaponObjects)
@@ -171,11 +166,6 @@ public class PlayerObject : MonoBehaviour
             foreach (var gw in toDisable)
             {
                 gw.GetComponentInChildren<Collider>().enabled = true;
-                var rb = gw.GetComponentInChildren<Rigidbody>();
-                if (rb != null)
-                {
-                    rb.isKinematic = false;
-                }
             }
             gameObject.transform.position = Server.getSpawnLocation();
 

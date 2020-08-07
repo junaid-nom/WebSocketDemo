@@ -107,34 +107,50 @@ public static class Conditions
     {
         // TODO: Eventually see what weapon they have equiped and use that ones info;
         float range = Constants.swordInfo.avgRange;
-        CopyMovement closest = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.charState[0].myState.localPosition);
+        CopyMovement closest = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.getCharacterState(0).myState.localPosition);
         if (closest == null)
         {
             return false;
         }
-        return Vector3.Distance(bot.charState[0].myState.localPosition, closest.localPosition) <= range;
+        return Vector3.Distance(bot.getCharacterState(0).myState.localPosition, closest.localPosition) <= range;
     }
 
     public static bool CanAttackRange(BotState bot)
     {
         // TODO: Eventually see what weapon I have equiped and use that ones info;
         float range = Constants.swordInfo.avgRange;
-        CopyMovement closest = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.charState[0].myState.localPosition);
+        CopyMovement closest = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.getCharacterState(0).myState.localPosition);
         if (closest == null)
         {
             return false;
         }
-        return Vector3.Distance(bot.charState[0].myState.localPosition, closest.localPosition) <= range;
+        return Vector3.Distance(bot.getCharacterState(0).myState.localPosition, closest.localPosition) <= range;
+    }
+
+    public static bool CanAttackRangeTarget(BotState bot)
+    {
+        // TODO: Eventually see what weapon I have equiped and use that ones info;
+        float range = Constants.swordInfo.avgRange;
+        if (bot.extraState.targetUID == null)
+        {
+            return false;
+        }
+        CopyMovement target = BotHelpers.getEnemies(bot).Find(cp => cp.objectInfo.uid == bot.extraState.targetUID);
+        if (target == null)
+        {
+            return false;
+        }
+        return Vector3.Distance(bot.getCharacterState(0).myState.localPosition, target.localPosition) <= range;
     }
 
     public static bool closestEnemyMissedInAttackRange(BotState bot)
     {
-        CopyMovement closest = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.charState[0].myState.localPosition);
+        CopyMovement closest = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.getCharacterState(0).myState.localPosition);
         if (closest !=null && closest.anim_state!=null && Constants.attackAnimationInfo.nameToAnimation.ContainsKey(closest.anim_state))
         {
             AnimationClip attack = Constants.attackAnimationInfo.nameToAnimation[closest.anim_state];
             float leftOverTime = attack.length - closest.normalizedTime;
-            float distance = Vector3.Distance(bot.charState[0].myState.localPosition, closest.localPosition);
+            float distance = Vector3.Distance(bot.getCharacterState(0).myState.localPosition, closest.localPosition);
             float runTime = distance / Constants.charMoveSpeed;
             if (leftOverTime - Constants.timeNeededToCounterAttack > runTime)
             {
@@ -146,12 +162,12 @@ public static class Conditions
 
     public static bool selfAttacking(BotState bot)
     {
-        if (bot.charState[0].myState.anim_state == null)
+        if (bot.getCharacterState(0).myState.anim_state == null)
         {
             return false;
         }
         
-        return Constants.attackAnimationInfo.nameToAnimation.ContainsKey(bot.charState[0].myState.anim_state);
+        return Constants.attackAnimationInfo.nameToAnimation.ContainsKey(bot.getCharacterState(0).myState.anim_state);
     }
 
     public static bool memoryIsChasing(BotState bot)
@@ -163,7 +179,7 @@ public static class Conditions
     {
         return (bot) =>
         {
-            return bot.charState[0].myState.health >= health;
+            return bot.getCharacterState(0).myState.health >= health;
         };
     }
 
@@ -171,7 +187,7 @@ public static class Conditions
     {
         return (bot) =>
         {
-            var enemiesClose = BotHelpers.getEnemies(bot).FindAll(cp => Vector3.Distance(cp.localPosition, bot.charState[0].myState.localPosition) <= range);
+            var enemiesClose = BotHelpers.getEnemies(bot).FindAll(cp => Vector3.Distance(cp.localPosition, bot.getCharacterState(0).myState.localPosition) <= range);
             var enemiesLow = enemiesClose.FindAll(cp => cp.health <= health);
             return enemiesLow.Count > 0;
         };
@@ -190,7 +206,7 @@ public static class Behaviors
 
         List<CopyMovement> enemies = BotHelpers.getEnemies(bot);
 
-        Vector2 runTo = BotHelpers.getSafestDirection(bot.charState[0].myState.localPosition, enemies);
+        Vector2 runTo = BotHelpers.getSafestDirection(bot.getCharacterState(0).myState.localPosition, enemies);
 
         //Find closest direction of the 8 a player can move to runTo
         Vector2 closestDir = BotHelpers.positionToInputDirectionsFrom0_0(runTo);
@@ -213,7 +229,7 @@ public static class Behaviors
 
         List<CopyMovement> enemies = BotHelpers.getEnemies(bot);
 
-        Vector2 runTo = BotHelpers.getSafestDirection(bot.charState[0].myState.localPosition, enemies);
+        Vector2 runTo = BotHelpers.getSafestDirection(bot.getCharacterState(0).myState.localPosition, enemies);
 
         //Find closest direction of the 8 a player can move to runTo
         Vector2 closestDir = BotHelpers.positionToInputDirectionsFrom0_0(runTo);
@@ -256,10 +272,13 @@ public static class Behaviors
         CopyMovement target = BotHelpers.getSpecificEnemy(bot, bot.extraState.targetUID);
         if (target != null)
         {
-            Vector2 dir = BotHelpers.positionToInputDirections(new Vector2(bot.charState[0].myState.localPosition.x, bot.charState[0].myState.localPosition.z), new Vector2(target.localPosition.x, target.localPosition.z));
+            Vector2 dir = BotHelpers.positionToInputDirections(new Vector2(bot.getCharacterState(0).myState.localPosition.x, bot.getCharacterState(0).myState.localPosition.z), new Vector2(target.localPosition.x, target.localPosition.z));
             ret.x = dir.x;
             ret.y = dir.y;
-            Server.inspectorDebugger.addPair(new StringPair(bot.uid + "chase", "x:" + ret.x + "y" + ret.y));
+            if (Constants.inspectorDebugging)
+            {
+                Server.inspectorDebugger.addPair(new StringPair(bot.uid + "chase", "x:" + ret.x + "y" + ret.y));
+            }
             ret.buttonsDown = defaultButtons();
         }
         else
@@ -282,10 +301,13 @@ public static class Behaviors
             CopyMovement target = BotHelpers.getSpecificEnemy(bot, bot.extraState.targetUID);
             if (target != null)
             {
-                Vector2 dir = BotHelpers.positionToInputDirections(new Vector2(bot.charState[0].myState.localPosition.x, bot.charState[0].myState.localPosition.z), new Vector2(target.localPosition.x, target.localPosition.z));
+                Vector2 dir = BotHelpers.positionToInputDirections(new Vector2(bot.getCharacterState(0).myState.localPosition.x, bot.getCharacterState(0).myState.localPosition.z), new Vector2(target.localPosition.x, target.localPosition.z));
                 ret.x = dir.x;
                 ret.y = dir.y;
-                Server.inspectorDebugger.addPair(new StringPair(bot.uid + "attack", "x:" + ret.x + "y" + ret.y));
+                if (Constants.inspectorDebugging)
+                {
+                    Server.inspectorDebugger.addPair(new StringPair(bot.uid + "attack", "x:" + ret.x + "y" + ret.y));
+                }
 
                 ret.buttonsDown = defaultButtons();
                 ret.buttonsDown[buttonIndex] = true;

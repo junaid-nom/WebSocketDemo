@@ -74,10 +74,14 @@ public class Constants : MonoBehaviour
 
     public static readonly WeaponInfo swordInfo = new WeaponInfo(7, 7, 25, 40);
 
+    public const int maxBotCharacterState = 20;
+
     public const int maxBots = 3;
 
     public const float spawnXRange = 20;
     public const float spawnZRange = 11;
+
+    public const bool inspectorDebugging = false;
 
     void Awake()
     {

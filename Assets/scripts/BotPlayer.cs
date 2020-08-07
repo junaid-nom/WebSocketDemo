@@ -105,7 +105,7 @@ public class BotState
     // something for 
     public const string BOTUIDPREFIX = "SERVERBOT:";
     public readonly string playerName;
-    public List<CharacterState> charState = new List<CharacterState>(); // TODO :make sure new stuff is added at 0
+    List<CharacterState> charState = new List<CharacterState>(); // TODO :make sure new stuff is added at 0
     public AIMemory extraState = null; // is null when first ran
 
     public BotState(int botNumber)
@@ -124,6 +124,20 @@ public class BotState
         ret += " charstates: " + msgs.Count;
         ret += " extra state: " + extraState.ToString();
         return ret;
+    }
+
+    public CharacterState getCharacterState(int i)
+    {
+        return charState[i];
+    }
+
+    public void addCharacterState(CharacterState c)
+    {
+        charState.Insert(0, c);
+        if (charState.Count > Constants.maxBotCharacterState)
+        {
+            charState.RemoveRange(Constants.maxBotCharacterState, charState.Count - Constants.maxBotCharacterState);
+        }
     }
 }
 public class CharacterState
@@ -223,7 +237,7 @@ public static class Bots
             return Behaviors.standStill(bot); 
         }
 
-        if (bot.charState[0].myState.anim_state == Constants.deathState)
+        if (bot.getCharacterState(0).myState.anim_state == Constants.deathState)
         {
             return Behaviors.pickUpItem(bot);
         }
@@ -283,7 +297,7 @@ public static class Bots
             BehaviorList highHealth = new BehaviorList();
 
             Dictionary<Condition, bool> attackIfChasingConditions = new Dictionary<Condition, bool>();
-            attackIfChasingConditions.Add(Conditions.CanAttackRange, true);
+            attackIfChasingConditions.Add(Conditions.CanAttackRangeTarget, true);
             attackIfChasingConditions.Add(Conditions.memoryIsChasing, true);
             ConditionalBehavior attackIfChasing = new Tuple<Dictionary<Condition, bool>, BotBehavior>(attackIfChasingConditions, Behaviors.AttackTarget(0));
 
@@ -335,14 +349,14 @@ public static class Bots
             
             if (Conditions.closestEnemyMissedInAttackRange(bot) && !Conditions.selfAttacking(bot))
             {
-                retMem.targetUID = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.charState[0].myState.localPosition).objectInfo.uid;
+                retMem.targetUID = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.getCharacterState(0).myState.localPosition).objectInfo.uid;
                 retMem.chasingTarget = true;
             }
             else if (Conditions.nearByEnemyHealthLessThan(20, 40)(bot))
             {
-                var enemiesClose = BotHelpers.getEnemies(bot).FindAll(cp => Vector3.Distance(cp.localPosition, bot.charState[0].myState.localPosition) <= 40);
+                var enemiesClose = BotHelpers.getEnemies(bot).FindAll(cp => Vector3.Distance(cp.localPosition, bot.getCharacterState(0).myState.localPosition) <= 40);
                 var enemiesLow = enemiesClose.FindAll(cp => cp.health <= 20);
-                retMem.targetUID = BotHelpers.getClosest(enemiesLow, bot.charState[0].myState.localPosition).objectInfo.uid;
+                retMem.targetUID = BotHelpers.getClosest(enemiesLow, bot.getCharacterState(0).myState.localPosition).objectInfo.uid;
                 retMem.chasingTarget = true;
             }
 
@@ -378,7 +392,7 @@ public static class Bots
             BehaviorList highHealth = new BehaviorList();
 
             Dictionary<Condition, bool> attackIfChasingConditions = new Dictionary<Condition, bool>();
-            attackIfChasingConditions.Add(Conditions.CanAttackRange, true);
+            attackIfChasingConditions.Add(Conditions.CanAttackRangeTarget, true);
             attackIfChasingConditions.Add(Conditions.memoryIsChasing, true);
             ConditionalBehavior attackIfChasing = new Tuple<Dictionary<Condition, bool>, BotBehavior>(attackIfChasingConditions, Behaviors.AttackTarget(0));
 
@@ -448,12 +462,12 @@ public static class Bots
                     }
                     else if (enemies[0].health == enemies[enemies.Count - 1].health)
                     {
-                        retMem.targetUID = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.charState[0].myState.localPosition).objectInfo.uid;
+                        retMem.targetUID = BotHelpers.getClosest(BotHelpers.getEnemies(bot), bot.getCharacterState(0).myState.localPosition).objectInfo.uid;
                     }
                     else
                     {
                         var lowEnemies = enemies.FindAll(e => e.health <= enemies[0].health);
-                        retMem.targetUID = BotHelpers.getClosest(lowEnemies, bot.charState[0].myState.localPosition).objectInfo.uid;
+                        retMem.targetUID = BotHelpers.getClosest(lowEnemies, bot.getCharacterState(0).myState.localPosition).objectInfo.uid;
                     }
                     retMem.chasingTarget = true;
                 }

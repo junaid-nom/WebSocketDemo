@@ -37,7 +37,6 @@ public class AnimationHelperPlayer : MonoBehaviour
     {
         if (Server.isOn)
         {
-            Debug.Log("collided: " + Server.playerCollisionsThisFrame.Keys.Count);
             // TODO: Get closest item to self.
             if (Server.playerCollisionsThisFrame.ContainsKey(player.uid))
             {

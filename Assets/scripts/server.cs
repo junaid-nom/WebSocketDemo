@@ -98,6 +98,7 @@ public class StoreMessages : WebSocketBehavior
         }
         catch (System.Runtime.Serialization.SerializationException ex)
         {
+            Debug.Log("Error:" + ex);
             Debug.Log("Couldnt serialize msg:" + e.RawData);
         }
         
@@ -131,13 +132,13 @@ public class DebugLogWriter : System.IO.TextWriter
     public override void Write(string value)
     {
         base.Write(value);
-        Debug.LogError(value);
+        Debug.Log(value);
         NetDebug.printBoth(value);
     }
     public override void WriteLine(string value)
     {
         base.WriteLine();
-        Debug.LogError(value);
+        Debug.Log(value);
         NetDebug.printBoth(value);
     }
 
@@ -244,8 +245,11 @@ public class Server : MonoBehaviour
                         Debug.Log("null retai");
                     }
                     bot.aiList = result.Item1;
-                    //NetDebug.printBoth("Got: uinp " + ((uinp !=null) ? uinp.ToString() : "null") + " for: " + bot.state.uid);
-                    inspectorDebugger.addPair(new StringPair(bot.state.uid, bot.ToString()));
+
+                    if (Constants.inspectorDebugging)
+                    {
+                        inspectorDebugger.addPair(new StringPair(bot.state.uid, bot.ToString()));
+                    }
                     if (uinp != null)
                     {
                         StoreMessages.newMsgs.Add(new GotMessage(bot.state.uid, uinp));
@@ -456,7 +460,7 @@ public class Server : MonoBehaviour
                 CopyMovement cp = (CopyMovement)m;
                 if (cp.objectInfo.uid == uid)
                 {
-                    uidToBot[uid].state.charState.Insert(0, new CharacterState(cp));
+                    uidToBot[uid].state.addCharacterState(new CharacterState(cp));
                 }
             }
         }

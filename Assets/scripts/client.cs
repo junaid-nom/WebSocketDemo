@@ -53,6 +53,7 @@ public class NetworkObjectClient
 public class Client : MonoBehaviour
 {
     // set via alert:
+    bool started = false;
     public bool autoStartClient;
     public Text displayAlert;
     static Text _displayAlert;
@@ -84,13 +85,14 @@ public class Client : MonoBehaviour
     public TextMeshProUGUI pingDisplay;
 
     public Text nameInput;
-    public List<CopyMovement> scoreList = new List<CopyMovement>();
+    public Dictionary<string, CopyMovement> scoreDict = new Dictionary<string, CopyMovement>();
     public TextMeshProUGUI scoreBoardDisplay;
 
     public GameObject damagePopUp;
     public GameObject getHurtPopUp;
     public GameObject healPopUp;
 
+    public UIController uIController;
     public bool useLocal;
 
     // Start is called before the first frame update
@@ -101,6 +103,7 @@ public class Client : MonoBehaviour
             startClient();
         }
         _displayAlert = displayAlert;
+        uIController.turnOffInGameUI();
     }
 
     // Update is called once per frame
@@ -113,6 +116,12 @@ public class Client : MonoBehaviour
             ws.Send(BinarySerializer.Serialize(newPing));
             timeSincePing = Time.time;
         }
+        if (ws != null && ws.GetState() == WebSocketState.Open && !started)
+        {
+            started = true;
+            uIController.inGameMode();
+        }
+
         StringMessage sm = clientMsgMan.popMessage<StringMessage>();
         while (sm != null)
         {
@@ -151,7 +160,7 @@ public class Client : MonoBehaviour
             pi = clientMsgMan.popMessage<PrivatePlayerInfo>();
         }
 
-        scoreList.Clear();
+        // TODO: Scoreboard I believe will keep all usernames of even Disconnected users. Need to clear old ones.
         CopyMovement cp = clientMsgMan.popMessage<CopyMovement>();
         while (cp != null)
         {
@@ -207,6 +216,7 @@ public class Client : MonoBehaviour
 
     void LateUpdate()
     {
+        var scoreList = new List<CopyMovement>(scoreDict.Values);
         scoreList.Sort((s1, s2) =>
         {
             if (s1.score == s2.score) return 0;
@@ -214,7 +224,7 @@ public class Client : MonoBehaviour
             if (s1.score > s2.score) return -1;
             return 0;
         });
-
+        
         string scoreString = "";
         string myScore = null;
         for(int i = 0; i < scoreList.Count; i++)
@@ -313,7 +323,7 @@ public class Client : MonoBehaviour
 
     public void processCopyMovement(CopyMovement cp)
     {
-        scoreList.Add(cp);
+        scoreDict[cp.objectInfo.uid] = cp;
         string k = cp.objectInfo.objectID;
         if (cp.objectInfo.uid == myUID)
         {
@@ -399,6 +409,7 @@ public class Client : MonoBehaviour
         };
         ws.OnOpen += () =>
         {
+            
             NameSetMessage newName = new NameSetMessage(nameInput.text.Substring(0, Mathf.Min(nameInput.text.Length, Constants.maxNameLength)));
             ws.Send(BinarySerializer.Serialize(newName));  
         };

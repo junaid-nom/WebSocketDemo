@@ -119,7 +119,19 @@ public class InputToMovement : MonoBehaviour
     public static Quaternion getRotationFromInput(UserInput inp)
     {
         Vector3 direction = new Vector3(inp.x, 0, inp.y).normalized;
-        return Quaternion.Euler(0, Quaternion.LookRotation((direction).normalized).eulerAngles.y, 0);
+        return Quaternion.Euler(0, lookRotationYWrapper(direction), 0);
+    }
+
+    public static float lookRotationYWrapper(Vector3 directionTo)
+    {
+        if (directionTo.x == 0 && directionTo.y == 0 && directionTo.z == 0)
+        {
+            return 0;
+        } else
+        {
+            return Quaternion.LookRotation((directionTo).normalized).eulerAngles.y;
+        }
+        
     }
 
     public static Quaternion getRotationToLookAt(Vector3 position, Vector3 lookAt)
@@ -127,7 +139,7 @@ public class InputToMovement : MonoBehaviour
         position = new Vector3(position.x, 0, position.z);
         lookAt = new Vector3(lookAt.x, 0, lookAt.z);
         Vector3 directionTo = lookAt - position;
-        return Quaternion.Euler(0, Quaternion.LookRotation((directionTo).normalized).eulerAngles.y, 0);
+        return Quaternion.Euler(0, lookRotationYWrapper(directionTo), 0);
     }
 
     public static CopyMovement inputToMovement(UserInput inp, Vector3 oldPositionLocal, Quaternion oldRotationLocal, float speed, Animator animator, string canChangeState, List<string> stateNames, string uid, float health, WeaponType weapon, int score, string playerName)
