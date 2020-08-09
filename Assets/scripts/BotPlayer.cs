@@ -371,8 +371,6 @@ public static class Bots
         
     }
 
-
-
     // put init as extraState is null
     public static Tuple<AIPriorityList, AIMemory> AggroLowHealth(AIPriorityList ai, BotState bot)
     {
@@ -481,6 +479,18 @@ public static class Bots
 
             return Tuple.Create(ai, retMem);
         }
+    }
 
+    public static Tuple<AIPriorityList, AIMemory> DoNothingBot(AIPriorityList ai, BotState bot)
+    {
+        if (bot.extraState == null)
+        {
+            return Tuple.Create(new AIPriorityList(), new AIMemory());
+        }
+        else
+        {
+            return Tuple.Create(ai, bot.extraState);
+        }
+        
     }
 }

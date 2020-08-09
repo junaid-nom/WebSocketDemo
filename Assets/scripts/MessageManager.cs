@@ -302,17 +302,22 @@ public class MessageManager
 
     public void addMessage(Message msg)
     {
-        System.Type msgType = msg.GetType();
-        if (msgType == typeof(ListMessage))
+        if (msg != null)
         {
-            ListMessage lmsg = (ListMessage)msg;
-            lmsg.messageArray.ForEach(addSingleMsg);
-        }
-        else
+            System.Type msgType = msg.GetType();
+            if (msgType == typeof(ListMessage))
+            {
+                ListMessage lmsg = (ListMessage)msg;
+                lmsg.messageArray.ForEach(addSingleMsg);
+            }
+            else
+            {
+                addSingleMsg(msg);
+            }
+        } else
         {
-            addSingleMsg(msg);
+            Debug.Log("Got null msg!");
         }
-        
     }
 
     void addSingleMsg(Message msg)
@@ -359,6 +364,25 @@ public class MessageManager
             }
             return ret;
         }
+    }
+
+    public int countAllMessages()
+    {
+        int total = 0;
+        foreach (var lmsgs in msgs.Values)
+        {
+            total += lmsgs.Count;
+            if (lmsgs.Count > 0)
+            {
+                Debug.Log("Leftover: " + lmsgs[0].GetType());
+            }
+        }
+        return total;
+    }
+
+    public void clearAllMessages()
+    {
+        msgs.Clear();
     }
 
     public static void debugMsg(Message deser)

@@ -272,7 +272,10 @@ public class Client : MonoBehaviour
     {
         if (_displayAlert != null && (distanceToAlert < 0 || distance < distanceToAlert))
         {
-            _displayAlert.text = toDisplay;
+            if (!dead)
+            {
+                _displayAlert.text = toDisplay;
+            }
             shouldDisplayAlert = true;
             canPickup = true;
             distanceToAlert = distance;
@@ -405,7 +408,7 @@ public class Client : MonoBehaviour
             Message deser = (Message)BinarySerializer.Deserialize(msg);
             clientMsgMan.addMessage(deser);
             //NetDebug.printBoth("Client got msg type: " + deser.msgType);
-            MessageManager.debugMsg(deser);
+            //MessageManager.debugMsg(deser);
         };
         ws.OnOpen += () =>
         {

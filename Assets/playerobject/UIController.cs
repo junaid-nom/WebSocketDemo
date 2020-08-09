@@ -15,7 +15,7 @@ public class UIController : MonoBehaviour
 #if UNITY_EDITOR
         serverButton.SetActive(true);
 #else
-        //serverButton.SetActive(false);
+        serverButton.SetActive(false);
 #endif
     }
 

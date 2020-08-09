@@ -37,7 +37,23 @@ public class UserManager : MonoBehaviour
 
     public void addMessage(Message m)
     {
-        usernet.msgMan.addMessage(m);
+        if (usernet.msgMan != null)
+        {
+            usernet.msgMan.addMessage(m);
+        } else
+        {
+            Debug.Log("Empty usernet " + usernet.uid);
+        }
+    }
+
+    public int countMessages()
+    {
+        return usernet.msgMan.countAllMessages();
+    }
+
+    public void clearMessages()
+    {
+        usernet.msgMan.clearAllMessages();
     }
 
     public void startup(string userid, string connID, GameObject playerprefab, Vector3 spawnLocation)
@@ -83,7 +99,6 @@ public class UserManager : MonoBehaviour
             {
                 inputBuffer.receiveInput(ui);
             }
-            
         }
         UserInput finalui = inputBuffer.getInput();
 
@@ -91,18 +106,18 @@ public class UserManager : MonoBehaviour
 
         CopyMovement cp = InputToMovement.inputToMovement(finalui, playerCharacter.transform.localPosition, playerCharacter.transform.localRotation, Constants.charMoveSpeed, playerAnimator, Constants.canMoveState, new List<string>(Constants.charUserControlledStateNames), currentConnID, playerHealth.getHealth(), playerObject.getEquipedWeapon(equipedSlot1), playerObject.score, playerName);
         playerCopyController.setMovement(cp);
-
+        
         if (playerObject.dead && finalui.buttonsDown.Count>=5 &&  finalui.buttonsDown[4])
         {
             playerObject.respawn();
         }
-
+        
         if (cp.anim_state != null && cp.anim_state!="" && cp.anim_state != "canMoveState" && cp.normalizedTime == 0)
         {
             //reset inp buffer
             inputBuffer.clearBuffer();
         }
-
+        
         Server.sendToAll(cp);
         Server.sendToSpecificUser(usernet.uid, playerObject.privateInfo);
     }
@@ -147,13 +162,14 @@ public class UserManager : MonoBehaviour
 
             // Delete if dced for awhile
             
-            if (System.DateTime.Now.Subtract(usernet.msgMan.LastMessageTime).TotalSeconds > 60)
+            if (System.DateTime.Now.Subtract(usernet.msgMan.LastMessageTime).TotalSeconds > Constants.secondsUntilConsiderDC)
             {
                 deleteSelf();
             }
             //Send Info about playerCharacter here. 
             // If we dont client will assume it died
         }
+        clearMessages();
     }
 
 

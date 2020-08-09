@@ -9,7 +9,8 @@ public class ColorChanger : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        defColor = mesh.material.color;
+        if (mesh != null)
+            defColor = mesh.material.color;
     }
 
     // Update is called once per frame
@@ -20,10 +21,12 @@ public class ColorChanger : MonoBehaviour
 
     public void setColor(Color color)
     {
-        mesh.material.color = color;
+        if (mesh != null)
+            mesh.material.color = color;
     }
     public void resetColor()
     {
-        mesh.material.color = defColor;
+        if (mesh != null)
+            mesh.material.color = defColor;
     }
 }

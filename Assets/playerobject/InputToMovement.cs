@@ -28,7 +28,11 @@ public class InputBuffer
 
     public void receiveInput(UserInput inp)
     {
-        receivedInput.Add(new InputTimed(System.DateTime.Now, inp));
+        receivedInput.Add(new InputTimed(System.DateTime.Now, inp)); // last is most recent
+        if (receivedInput.Count > Constants.maxInputBuffer)
+        {
+            receivedInput.RemoveRange(0, receivedInput.Count - (Constants.maxInputBuffer/2));
+        }
         //Debug.Log("Got inp" + inp);
     }
 
@@ -86,8 +90,6 @@ public class InputBuffer
 
 public class InputToMovement : MonoBehaviour
 {
-
-
     public static UserInput getClientInput(bool equipedSlot1)
     {
         UserInput newInp = new UserInput();

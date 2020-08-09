@@ -106,5 +106,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1e744c15b220ac49a5662afab3d2cc3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  display: 'Press E To Pick Up: 5 Health'
+  display: 'Press E To Pick Up: 15 Health'
   myObjId: 

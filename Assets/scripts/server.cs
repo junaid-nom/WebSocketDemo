@@ -4,6 +4,8 @@ using UnityEngine;
 using WebSocketSharp;
 using System.Text;
 using WebSocketSharp.Server;
+using TMPro;
+
 
 using BehaviorList = System.Collections.Generic.List<System.Tuple<System.Collections.Generic.Dictionary<Condition, bool>, BotBehavior>>;
 using ConditionalBehavior = System.Tuple<System.Collections.Generic.Dictionary<Condition, bool>, BotBehavior>;
@@ -58,7 +60,7 @@ Bot helping:
 - TODO: actually have the AnimationInfo script have code to handle different weapons somehow (need to know enemies current weapon? or just use the animation clip thats playing on the enemy object?)
 */
 
-public struct GotMessage
+public class GotMessage
 {
     public string uid;
     public Message m;
@@ -71,7 +73,30 @@ public struct GotMessage
 
 public class StoreMessages : WebSocketBehavior
 {
-    public static List<GotMessage> newMsgs = new List<GotMessage>();
+    static List<GotMessage> newMsgs = new List<GotMessage>();
+    public static GotMessage popMsg()
+    {
+        lock (newMsgs)
+        {
+            if (newMsgs.Count > 0)
+            {
+                var ret = newMsgs[0];
+                newMsgs.RemoveAt(0);
+                return ret;
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+    public static void addMsg(GotMessage m)
+    {
+        lock(newMsgs)
+        {
+            newMsgs.Add(m);
+        }
+    }
 
     protected override void OnMessage(MessageEventArgs e)
     {
@@ -93,7 +118,7 @@ public class StoreMessages : WebSocketBehavior
             }
             else
             {
-                newMsgs.Add(new GotMessage(ID, deser));
+                addMsg(new GotMessage(ID, deser));
             }
         }
         catch (System.Runtime.Serialization.SerializationException ex)
@@ -118,12 +143,20 @@ public class StoreMessages : WebSocketBehavior
 
     protected override void OnOpen()
     {
-        newMsgs.Add(new GotMessage(ID, new OpenMessage()));
+        addMsg(new GotMessage(ID, new OpenMessage()));
+        if (Constants.testing)
+        {
+            ServerTest.connIds.Add(ID);
+        }
     }
 
     protected override void OnClose(CloseEventArgs e)
     {
-        newMsgs.Add(new GotMessage(ID, new CloseMessage()));
+        addMsg(new GotMessage(ID, new CloseMessage()));
+        if (Constants.testing)
+        {
+            ServerTest.connIds.Remove(ID);
+        }
     }
 }
 
@@ -194,40 +227,87 @@ public class Server : MonoBehaviour
 
     public static Dictionary<string, List<PlayerCollision>> playerCollisionsThisFrame = new Dictionary<string, List<PlayerCollision>>();
 
+    public GameObject sceneCamera;
+
+    static bool dontGC = false;
+
     private void Awake()
     {
         inspectorDebugger = gameObject.GetComponent<InspectorDebugger>();
+        if (Application.isBatchMode && sceneCamera != null)
+        {
+            Destroy(sceneCamera);
+        }
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        Application.targetFrameRate = Constants.targetFrameRate;
 #if UNITY_EDITOR
         Debug.Log("Unity Editor");
 #elif UNITY_STANDALONE_LINUX
         autoStartServer = true;
 #endif
+        if (Application.isBatchMode)
+        {
+            autoStartServer = true;
+        }
+        if(Constants.testing)
+        {
+            autoStartServer = false;
+        }
         if (autoStartServer)
         {
+            Debug.Log("Auto starting server");
             startServer();
         }
     }
-    
+
     // Update is called once per frame
     void Update()
     {
+        // memory leak in server mode
+        if (Application.isBatchMode)
+        {
+            TextMeshPro[] tmr = (TextMeshPro[])FindObjectsOfType(typeof(TextMeshPro));
+            foreach (TextMeshPro r in tmr)
+            {
+                Destroy(r);
+            }
+
+            Renderer[] rs = (Renderer[])FindObjectsOfType(typeof(Renderer));
+            foreach (Renderer r in rs)
+            {
+                r.enabled = false;
+                Destroy(r);
+            }
+            SkinnedMeshRenderer[] smr = (SkinnedMeshRenderer[])FindObjectsOfType(typeof(SkinnedMeshRenderer));
+            foreach (Renderer r in smr)
+            {
+                r.enabled = false;
+                Destroy(r);
+            }
+            CanvasRenderer[] cr = (CanvasRenderer[])FindObjectsOfType(typeof(CanvasRenderer));
+            foreach (var rend in cr)
+            {
+                rend.gameObject.SetActive(false);
+            }
+        }
+        
         if (wssv != null && wssv.IsListening)
         {
             // TODO: If bots are inactive, check if UserManager exists, if it does, send the OnClose message to it
             // TODO: Bots generate artificial messages here. Probably just UserInput msgs.
             // Add the msgs to StoreMessages.newMsgs
+            
             foreach (Bot bot in uidToBot.Values)
             {
                 if (!Bots.botAlive(bot.state, wssv.WebSocketServices["/"].Sessions.Count, Constants.maxBots))
                 {
                     if (uidToUserM.ContainsKey(bot.state.uid))
                     {
-                        StoreMessages.newMsgs.Add(new GotMessage(bot.state.uid, new CloseMessage()));
+                        StoreMessages.addMsg(new GotMessage(bot.state.uid, new CloseMessage()));
                         bot.reset();
                     }
                 } else
@@ -235,7 +315,7 @@ public class Server : MonoBehaviour
                     if (bot.aiList == null)
                     {
                         // Bot is just starting up. So set its name
-                        StoreMessages.newMsgs.Add(new GotMessage(bot.state.uid, new NameSetMessage(bot.state.playerName)));
+                        StoreMessages.addMsg(new GotMessage(bot.state.uid, new NameSetMessage(bot.state.playerName)));
                     }
                     System.Tuple<AIPriorityList, AIMemory> result = bot.ai(bot.aiList, bot.state);
                     bot.state.extraState = result.Item2;
@@ -252,19 +332,19 @@ public class Server : MonoBehaviour
                     }
                     if (uinp != null)
                     {
-                        StoreMessages.newMsgs.Add(new GotMessage(bot.state.uid, uinp));
+                        StoreMessages.addMsg(new GotMessage(bot.state.uid, uinp));
                     }
 
                     // clear msgs because guaranteed to get a fresh state because this runs at the same time as a "server tick"
                     // msgs is the NEW MESSAGES this tick.
-                    bot.state.msgs.Clear();
                 }
+                bot.state.msgs.Clear();
             }
 
             // Add Items
             // First count each item type
             Dictionary<System.Type, int> currentItems = new Dictionary<System.Type, int>();
-            foreach(var itemT in Constants.worldItemTypes)
+            foreach (var itemT in Constants.worldItemTypes)
             {
                 currentItems[itemT] = 0;
             }
@@ -277,7 +357,7 @@ public class Server : MonoBehaviour
                 }
             }
             // get items equiped by players
-            foreach(var um in uidToUserM.Values)
+            foreach (var um in uidToUserM.Values)
             {
                 var po = um.playerObject;
                 if (po != null)
@@ -294,11 +374,11 @@ public class Server : MonoBehaviour
                     }
                 }
             }
-
+            
             // Now for each type, get the number of more to spawn and spawn them
             int numItems = (int)(Mathf.Max(wssv.WebSocketServices["/"].Sessions.Count, Constants.maxBots) * Constants.itemToPlayerRatio);
 
-            foreach(var itemType in currentItems.Keys)
+            foreach (var itemType in currentItems.Keys)
             {
                 int toSpawn = numItems - currentItems[itemType];
                 for (int i = 0; i < toSpawn; i++)
@@ -310,10 +390,11 @@ public class Server : MonoBehaviour
 
             // Use while loop and remove 1 at a time so that its more thread safe.
             // If you clear whole list, maybe a message was added right before you cleared.
-            while (StoreMessages.newMsgs.Count > 0)
+            var mm = StoreMessages.popMsg();
+            while (mm != null)
             {
-                transferNewMessage(StoreMessages.newMsgs[0]);
-                StoreMessages.newMsgs.RemoveAt(0);
+                transferNewMessage(mm);
+                mm = StoreMessages.popMsg();
             }
 
             // Call update on all UserManagers.
@@ -336,7 +417,8 @@ public class Server : MonoBehaviour
             {
                 try
                 {
-                    wssv.WebSocketServices["/"].Sessions.SendTo(BinarySerializer.Serialize(new ListMessage(msgs.Value)), msgs.Key);
+                    var toSend = BinarySerializer.Serialize(new ListMessage(msgs.Value));
+                    wssv.WebSocketServices["/"].Sessions.SendTo(toSend, msgs.Key);
                 } catch (System.InvalidOperationException)
                 {
                     Debug.Log("Couldnt send msg probably dced player");
@@ -345,6 +427,31 @@ public class Server : MonoBehaviour
             }
             wssv.WebSocketServices["/"].Sessions.Broadcast(BinarySerializer.Serialize(new ListMessage(broadcastMessageQueue)));
             broadcastMessageQueue.Clear();
+        }
+
+        if (false && ((int)(Time.time)) % 10 == 0)
+        {
+            int maxMem = 15 * 1000000 * Mathf.Max(uidToUserM.Values.Count, 1);
+            long getTotalMemory = System.GC.GetTotalMemory(false);
+            if (Time.frameCount % 1000 == 0 && ((Constants.testing && Time.frameCount % 100000 == 0) || !Constants.testing))
+            {
+                Debug.Log("Max: " + maxMem + " Mem: " + getTotalMemory + "frames " + Time.frameCount + " persec: " + (Time.frameCount / Time.time));
+                int totalMsgs = 0;
+                foreach (var li in uidToMessageQueue.Values)
+                {
+                    totalMsgs += li.Count;
+                }
+                Debug.Log("Total msgs: " + totalMsgs + " keys: " + uidToMessageQueue.Keys.Count);
+            }
+            if (getTotalMemory > maxMem && !dontGC)
+            {
+                Debug.Log($"Manually triggering GC memory:{getTotalMemory} min: {maxMem} at {System.DateTime.Now.ToString("h:mm:ss tt")}");
+                System.GC.Collect();
+                if (getTotalMemory > maxMem)
+                {
+                    dontGC = true;
+                }
+            }
         }
     }
 
@@ -416,7 +523,7 @@ public class Server : MonoBehaviour
             if (um == null)
             {
                 addUserManager(gm.uid);
-                um = Server.getUserManager(gm.uid);
+                um = getUserManager(gm.uid);
             }
             um.addMessage(gm.m);
         }
@@ -424,30 +531,43 @@ public class Server : MonoBehaviour
 
     public static void sendToSpecificUser(string uid, Message m)
     {
-        if (uid.Contains(BotState.BOTUIDPREFIX))
+        if (Constants.testing)
         {
-            // TODO: if uid is server (bot), then send to them directly
-            uidToBot[uid].state.msgs.Add(m);
-            tryAddToBotCharState(uid, m);
-        }
-        else
+            ServerTest.sendToSpecificUser(uid, m);
+        } else
         {
-            string connID = uidToUserM[uid].currentConnID;
-            uidToMessageQueue.AddOrCreate<string, List<Message>, Message>(connID, m);
+            if (uid.Contains(BotState.BOTUIDPREFIX))
+            {
+                // TODO: if uid is server (bot), then send to them directly
+                uidToBot[uid].state.msgs.Add(m);
+                tryAddToBotCharState(uid, m);
+            }
+            else
+            {
+                string connID = uidToUserM[uid].currentConnID;
+                uidToMessageQueue.AddOrCreate<string, List<Message>, Message>(connID, m);
+            }
         }
+        
     }
 
     public static void sendToAll(Message m)
     {
-        byte[] serializedMsg = BinarySerializer.Serialize(m);
-        //wssv.WebSocketServices["/"].Sessions.Broadcast(serializedMsg);
-        broadcastMessageQueue.Add(m);
-
-        // TODO: Send msg directly to all things with UID that has server in it
-        foreach (var bot in uidToBot.Values)
+        if (Constants.testing)
         {
-            bot.state.msgs.Add(m);
-            tryAddToBotCharState(bot.state.uid, m);
+            ServerTest.sendToAll(m);
+        } else
+        {
+            byte[] serializedMsg = BinarySerializer.Serialize(m);
+            //wssv.WebSocketServices["/"].Sessions.Broadcast(serializedMsg);
+            broadcastMessageQueue.Add(m);
+
+            // TODO: Send msg directly to all things with UID that has server in it
+            foreach (var bot in uidToBot.Values)
+            {
+                bot.state.msgs.Add(m);
+                tryAddToBotCharState(bot.state.uid, m);
+            }
         }
     }
 
@@ -512,6 +632,8 @@ public class Server : MonoBehaviour
             Bot b4 = new Bot(Bots.AggroLowHealth, new BotState(3), null);
             Bot b5 = new Bot(Bots.AttackAndChaseOrRunawayBot, new BotState(4), null);
 
+            //Bot b1 = new Bot(Bots.DoNothingBot, new BotState(0), null);
+
             uidToBot.Add(b1.state.uid, b1);
             uidToBot.Add(b2.state.uid, b2);
             uidToBot.Add(b3.state.uid, b3);
@@ -530,17 +652,7 @@ public class Server : MonoBehaviour
                 
             //    objToItems.Add(h1.objectInfo.objectID, h1);
             //};
-
-            //System.Action addSpear = () =>
-            //{
-            //    var loc = getSpawnLocation();
-            //    var w1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(SpearItem)]);
-            //    w1.transform.position = loc;
-            //    w1.transform.Rotate(new Vector3(0, 1, 0), Random.Range(0, 360));
-            //    WorldItem wi1 = new WorldItem(new NetworkObjectInfo(w1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new SpearItem(), loc, w1.transform.localRotation, 1);
-
-            //    objToItems.Add(wi1.objectInfo.objectID, wi1);
-            //};
+            
             for (int i = 0; i< 1; i++)
             {
                 spawnItem(typeof(HealthItem), 1);
@@ -548,28 +660,34 @@ public class Server : MonoBehaviour
                 spawnItem(typeof(GreatSwordItem), 1);
             }
         }
+        if (Application.isBatchMode)
+        {
+            TextMeshPro[] tmr = (TextMeshPro[])FindObjectsOfType(typeof(TextMeshPro));
+            foreach (TextMeshPro r in tmr)
+            {
+                Destroy(r);
+            }
+
+            Renderer[] rs = (Renderer[])FindObjectsOfType(typeof(Renderer));
+            foreach (Renderer r in rs)
+            {
+                r.enabled = false;
+                Destroy(r);
+            }
+            SkinnedMeshRenderer[] smr = (SkinnedMeshRenderer[])FindObjectsOfType(typeof(SkinnedMeshRenderer));
+            foreach (Renderer r in smr)
+            {
+                r.enabled = false;
+                Destroy(r);
+            }
+            CanvasRenderer[] cr = (CanvasRenderer[])FindObjectsOfType(typeof(CanvasRenderer));
+            foreach(var rend in cr)
+            {
+                rend.gameObject.SetActive(false);
+            }
+            Debug.Log("BatchMode!    !! !! !   ! ! !");
+        }
     }
-
-    //void addHealth()
-    //{
-    //    var loc = getSpawnLocation();
-    //    var he1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(HealthItem)]);
-    //    he1.transform.position = loc;
-    //    WorldItem h1 = new WorldItem(new NetworkObjectInfo(he1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new HealthItem(5), loc, he1.transform.localRotation, 1);
-
-    //    objToItems.Add(h1.objectInfo.objectID, h1);
-    //}
-
-    //void addSpear()
-    //{
-    //    var loc = getSpawnLocation();
-    //    var w1 = Instantiate<GameObject>(Constants.prefabsFromType[typeof(SpearItem)]);
-    //    w1.transform.position = loc;
-    //    w1.transform.Rotate(new Vector3(0, 1, 0), Random.Range(0, 360));
-    //    WorldItem wi1 = new WorldItem(new NetworkObjectInfo(w1.GetInstanceID() + "", NetworkObjectType.worldItem, ""), new SpearItem(), loc, w1.transform.localRotation, 1);
-
-    //    objToItems.Add(wi1.objectInfo.objectID, wi1);
-    //}
 
     static void spawnItem(System.Type t, int quantityInOneSpot, Vector3 spawnLocation)
     {

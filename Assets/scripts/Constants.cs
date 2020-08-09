@@ -24,6 +24,9 @@ public delegate T best<T>(T a, T b);
 
 public class Constants : MonoBehaviour
 {
+    public const int targetFrameRate = 400;
+    public const int secondsUntilConsiderDC = 60; //was 60
+
     public const int port = 7270;
     public const string remoteServer = "db.mindgamemagicka.com"; // 3.209.19.120 or db.mindgamemagicka.com
     public const string localServer = "localhost";
@@ -75,6 +78,7 @@ public class Constants : MonoBehaviour
     public static readonly WeaponInfo swordInfo = new WeaponInfo(7, 7, 25, 40);
 
     public const int maxBotCharacterState = 20;
+    public const int maxInputBuffer = 100;
 
     public const int maxBots = 3;
 
@@ -82,6 +86,7 @@ public class Constants : MonoBehaviour
     public const float spawnZRange = 11;
 
     public const bool inspectorDebugging = false;
+    public const bool testing = false;
 
     void Awake()
     {
