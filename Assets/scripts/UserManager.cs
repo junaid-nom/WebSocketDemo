@@ -28,6 +28,7 @@ public class UserManager : MonoBehaviour
     bool closed = false;
     public bool equipedSlot1 = true;
     public string playerName = "-";
+    public float pingHalfTime; // time it takes for client message to get to server?
 
     // Start is called before the first frame update
     void Start()

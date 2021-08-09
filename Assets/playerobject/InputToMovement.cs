@@ -175,6 +175,10 @@ public class InputToMovement : MonoBehaviour
         }
 
         int index = inp.buttonsDown.FindIndex(u => u);
+
+        // Note could do some rollback style lag compensation by adding half their ping time to their input messages.
+        // then add that to the starting normalizedTime. However would be very extremely easy to abuse.
+        // Need a way for server to get their own ping of the client I guess, but that could also be abused.
         
         if (canDodge && inp.buttonsDown != null && inp.buttonsDown.Count > 3 && inp.buttonsDown[3])
         {

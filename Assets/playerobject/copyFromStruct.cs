@@ -74,15 +74,18 @@ public class copyFromStruct : MonoBehaviour
             playerObject.enableWeapon(mv.weapon);
         if (mv.anim_state != null)
         {
-            if ((animator.GetCurrentAnimatorStateInfo(0).normalizedTime < mv.normalizedTime || animator.GetCurrentAnimatorStateInfo(0).normalizedTime - mv.normalizedTime > .1) || !animator.GetCurrentAnimatorStateInfo(0).IsName(mv.anim_state))
+            // Speed up animations based off of half ping so more accurate to what is on the server at the moment to compensate for lag.
+            float expectedNormalizedTime = Server.isOn ? mv.normalizedTime : ((Client.lastPingDiff / 2) + mv.normalizedTime - .01f);
+            float animCurrentTime = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            if ((animCurrentTime < expectedNormalizedTime || animCurrentTime - expectedNormalizedTime > .1) || !animator.GetCurrentAnimatorStateInfo(0).IsName(mv.anim_state))
             {
                 animator.StopPlayback();
                 // animator set controller
                 playerObject.enableWeapon(mv.weapon);
                 animator.runtimeAnimatorController = Constants.weaponToAnimator[mv.weapon];
-                animator.Play(mv.anim_state, 0, mv.normalizedTime);
+                animator.Play(mv.anim_state, 0, expectedNormalizedTime);
             }
-        } else if(playerObject.isClientObject) 
+        } else if(playerObject.isClientObject)
         {
             // only revert to default for client version because otherwise weird shit will happen for gethit animation because it will be OVERWRITTEN by the copystruct
             // This would fuck up any animation set not by copystruct here on server.

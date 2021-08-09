@@ -24,11 +24,12 @@ public delegate T best<T>(T a, T b);
 
 public class Constants : MonoBehaviour
 {
-    public const int targetFrameRate = 400;
+    public const int targetFrameRate = 120;
     public const int secondsUntilConsiderDC = 60; //was 60
 
-    public const int port = 7270;
-    public const string remoteServer = "db.mindgamemagicka.com"; // 3.209.19.120 or db.mindgamemagicka.com
+    public const int portClient = 7271;
+    public const int portServer = 7270;//need to be diff cause nginx is throwing address in use errors?
+    public const string remoteServer = "bobserver.greygods.com"; //"bobserver.greygods.com"; // ip is "206.189.205.115"
     public const string localServer = "localhost";
 
     public const int maxNameLength = 15;

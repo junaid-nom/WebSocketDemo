@@ -70,8 +70,8 @@ public class ServerTest : MonoBehaviour
                     Debug.Log("Starting test server");
                     startedWebSocket = true;
                     System.Console.SetOut(new DebugLogWriter());
-                    NetDebug.printBoth("about to start wssv at " + Constants.port);
-                    wssv = new WebSocketServer(Constants.port); // NEED to just use this format of just putting port or it wont work properly with remote server
+                    NetDebug.printBoth("about to start wssv at " + Constants.portServer);
+                    wssv = new WebSocketServer(Constants.portServer); // NEED to just use this format of just putting port or it wont work properly with remote server
                     wssv.AddWebSocketService<StoreMessages>("/");
 
                     NetDebug.printBoth("starting wssv ");
@@ -158,7 +158,7 @@ public class ServerTest : MonoBehaviour
 
     public void startAClient()
     {
-        string connectionTo = $"ws://{(Constants.localServer)}:{Constants.port}";
+        string connectionTo = $"ws://{(Constants.localServer)}:{Constants.portServer}"; //not sure if this port is fuked
         NetDebug.printBoth($"Connection to: {connectionTo}");
         var ws = WebSocketFactory.CreateInstance(connectionTo); // NOTE FOR SOME INSANO REASON 127.0.0.1 wont work but localhost will with hybridsocket
 

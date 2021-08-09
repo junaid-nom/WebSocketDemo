@@ -81,7 +81,7 @@ public class Client : MonoBehaviour
     public static bool equipedSlot1 = true;
 
     float timeSincePing = 0;
-    float lastPingDiff = 0;
+    public static float lastPingDiff = 0;
     public TextMeshProUGUI pingDisplay;
 
     public Text nameInput;
@@ -141,7 +141,8 @@ public class Client : MonoBehaviour
         while (pm != null)
         {
             lastPingDiff = Time.time - pm.timeSent;
-            pingDisplay.text = "Ping: " + Mathf.RoundToInt(lastPingDiff * 1000);
+            pingDisplay.text = "Ping: " + Mathf.RoundToInt(lastPingDiff * 1000); ;
+            
             pm = clientMsgMan.popMessage<PingMessage>();
         }
 
@@ -389,10 +390,17 @@ public class Client : MonoBehaviour
 
     public void startClient()
     {
-        string connectionTo = $"ws://{(useLocal ? Constants.localServer : Constants.remoteServer)}:{Constants.port}";
+        // WSS won't work because fucking websocket sharp doesn't support it ffs!
+        bool useWSS = !useLocal && false;
+        string websocket = useWSS ? "wss" : "ws";
+        string port = (useWSS) ? "" : $":{ Constants.portClient}";
+
+
+
+        string connectionTo = $"{websocket}://{(useLocal ? Constants.localServer : Constants.remoteServer)}{port}";
         NetDebug.printBoth($"Connection to: {connectionTo}");
         ws = WebSocketFactory.CreateInstance(connectionTo); // NOTE FOR SOME INSANO REASON 127.0.0.1 wont work but localhost will with hybridsocket
-
+        
         //UserInput testInp = new UserInput();
         //testInp.x = 1;
         //testInp.y = -1;
@@ -404,9 +412,23 @@ public class Client : MonoBehaviour
 
         ws.OnMessage += (byte[] msg) =>
         {
+            Debug.Log("Got msg!");
             //NetDebug.printBoth("Client Received: " + (msg));
-            Message deser = (Message)BinarySerializer.Deserialize(msg);
-            clientMsgMan.addMessage(deser);
+            try
+            {
+                Message deser = (Message)BinarySerializer.Deserialize(msg);
+                clientMsgMan.addMessage(deser);
+            } catch (System.Runtime.Serialization.SerializationException ex)
+            {
+                Debug.Log("Error:" + ex);
+                string smsg = "";
+                foreach (var b in msg)
+                {
+                    smsg += b;
+                }
+                Debug.Log("Couldnt serialize msg:" + smsg);
+            }
+            
             //NetDebug.printBoth("Client got msg type: " + deser.msgType);
             //MessageManager.debugMsg(deser);
         };

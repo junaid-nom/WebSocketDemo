@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using AOT;
+using System.Text;
 
 namespace HybridWebSocket
 {
@@ -469,6 +470,13 @@ namespace HybridWebSocket
                    
                 // Create WebSocket instance
                 this.ws = new WebSocketSharp.WebSocket(url);
+                /*
+                ws.SslConfiguration.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => {
+                    // Do something to validate the server certificate.
+                    Debug.Log("Checking ssl?");
+                    return true; // If the server certificate is valid.
+                };
+                */
 
                 // Bind OnOpen event
                 this.ws.OnOpen += (sender, ev) =>
@@ -479,8 +487,10 @@ namespace HybridWebSocket
                 // Bind OnMessage event
                 this.ws.OnMessage += (sender, ev) =>
                 {
-                    if (ev.RawData != null)
+                    if (ev.RawData != null && ev.RawData.Length > 0)
+                    {
                         this.OnMessage?.Invoke(ev.RawData);
+                    }
                 };
 
                 // Bind OnError event
@@ -748,7 +758,8 @@ namespace HybridWebSocket
 
         return wrapper;
 #else
-            return new WebSocket(url);
+            var ws = new WebSocket(url);
+            return ws;
 #endif
         }
 

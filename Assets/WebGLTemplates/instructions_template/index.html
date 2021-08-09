@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | WebSocketServerSharpLibrary</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <script src="TemplateData/UnityProgress.js"></script>
+    <script src="Build/UnityLoader.js"></script>
+    <script>
+      var unityInstance = UnityLoader.instantiate("unityContainer", "Build/wsd_webgl.json", {onProgress: UnityProgress});
+    </script>
+  </head>
+  <body>
+    <div class="webgl-content" style="top: 0%; left: 0%; -webkit-transform: translate(0%, 0%); transform: translate(0%, 0%);">
+      <div id="unityContainer" style="width: 1280px; height: 720px"></div>
+      <div class="footer">
+        
+        <!-- <div class="fullscreen" onclick="unityInstance.SetFullscreen(1)"></div> -->
+        
+        
+      </div>
+    </div>
+    <div style="width:20%; height:720px; overflow-y:scroll; position: absolute; right:0%;">
+      Goal: Run around and hit people to increase your score and try to stay #1
+      <div>
+        Controls:
+        <br/>
+        WASD to move
+        <br/>
+        Space to dodge (beginning you are invulnerable when you are glowing white)
+        <br/>
+        Pick Up Item/Respawn: E
+        <br/>
+        Switch Weapon: Left Shift
+        <br/>
+        Aim attacks with mouse
+        <br/>
+        Basic attack: Left click
+        <br/>
+        Alternate attack: right click
+        <br/>
+        Special attack: middle click
+      </div>
+      <div>
+        Tips:
+        <br/>
+        - There are weapons on the ground you can pick up. 
+        <br/>
+        - Killing enemies will drop their weapons.
+         <br/>
+        - You start with a basic sword, and can pick up a spear or a great sword.
+         <br/>
+        - Also the higher your score, the more LIFE STEAL you get, you will gain health when you damage enemies.
+         <br/>
+        - You can swap weapons instantly, use this to trick opponents.
+         <br/>
+        - When you are in a "get hurt" animation, you can dodge out of it early so don't get comboed!
+         <br/>
+        - You can also dodge to cancel the item pick up and respawn animations
+         <br/>
+        - Dealing damage increases your score based on the score of the enemy. Dealing the killing blow gives a lot of points.
+        <br/>
+        - Full screen browser so entire screen fits so that scroll wheel doesn't activate on middle click.
+      </div>
+    </div>
+  </body>
+</html>

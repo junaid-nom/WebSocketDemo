@@ -102,13 +102,13 @@ public class StoreMessages : WebSocketBehavior
     {
         // TODO: Eventually have login and this will prob be username->usermanager and there will be ID -> username or something
         // For now treat every new connection as a completely new user
-        
+
 
         //NetDebug.printBoth("Server Got msg " + e.Data + " Raw " + Encoding.UTF8.GetString(e.RawData));
 
         //Send(e.Data + " t: " + System.DateTime.Now.ToString("h:mm:ss tt"));
-        
-        // TODO: Add try catch here in case its not a serializable msg
+
+        // TODO: Add try catch here in case its not a serializable msg\
         try
         {
             Message deser = (Message)BinarySerializer.Deserialize(e.RawData);
@@ -616,8 +616,9 @@ public class Server : MonoBehaviour
     {
         isOn = true;
         System.Console.SetOut(new DebugLogWriter());
-        NetDebug.printBoth("about to start wssv at " + Constants.port);
-        wssv = new WebSocketServer(Constants.port); // NEED to just use this format of just putting port or it wont work properly with remote server
+        NetDebug.printBoth("about to start wssv at " + Constants.portServer);
+        // Don't use the secure bool for WSS, have to do all sorts of cert bs.
+        wssv = new WebSocketServer(Constants.portServer); // NEED to just use this format of just putting port or it wont work properly with remote server
         wssv.AddWebSocketService<StoreMessages>("/");
 
         NetDebug.printBoth("starting wssv ");
@@ -662,6 +663,7 @@ public class Server : MonoBehaviour
         }
         if (Application.isBatchMode)
         {
+            // Do stuff when in headless mode, turn off all graphics stuff.
             TextMeshPro[] tmr = (TextMeshPro[])FindObjectsOfType(typeof(TextMeshPro));
             foreach (TextMeshPro r in tmr)
             {
